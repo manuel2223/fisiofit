@@ -1,0 +1,49 @@
+/* En cliente/src/pages/MiCuentaPage.css */
+
+.mi-cuenta-container {
+  width: 90%;
+  max-width: 700px;
+  margin: 4rem auto;
+  display: flex;
+  justify-content: center;
+}
+
+.mi-cuenta-tarjeta {
+  width: 100%;
+  padding: 2rem;
+}
+
+.mi-cuenta-tarjeta h2 {
+  text-align: center;
+  color: var(--color-principal);
+  margin-bottom: 2rem;
+}
+
+.detalle-cuenta p {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.detalle-cuenta p strong {
+  color: var(--color-principal);
+}
+
+.boton-logout {
+  /* Copiamos el estilo del boton-primario pero en rojo */
+  background-color: #E53E3E; /* Rojo */
+  color: var(--color-blanco);
+  border: none;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  margin-top: 2rem;
+}
+
+.boton-logout:hover {
+  background-color: #C53030; /* Rojo más oscuro */
+}

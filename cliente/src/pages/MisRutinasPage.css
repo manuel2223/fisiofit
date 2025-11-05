@@ -1,0 +1,13 @@
+/* En cliente/src/pages/MisRutinasPage.css */
+
+.container-rutinas {
+  width: 90%;
+  max-width: 900px; /* Un poco más estrecho que reservar */
+  margin: 2rem auto;
+}
+
+.container-rutinas h2 {
+  text-align: center;
+  color: var(--color-principal);
+  margin-bottom: 2rem;
+}

@@ -1,0 +1,86 @@
+/* En cliente/src/pages/RegistroPage.css */
+
+.registro-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 2rem;
+}
+
+.registro-form {
+  width: 100%;
+  max-width: 500px; /* Un poco más ancho que el login */
+  padding: 2rem;
+}
+
+.registro-form h2 {
+  text-align: center;
+  color: var(--color-principal);
+  margin-bottom: 2rem;
+}
+
+.form-grupo {
+  margin-bottom: 1.5rem;
+}
+
+.form-grupo label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.form-grupo input[type="text"],
+.form-grupo input[type="email"],
+.form-grupo input[type="password"] {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+}
+
+/* Estilos para los botones de radio (rol) */
+.opciones-rol {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.opciones-rol label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.opciones-rol input[type="radio"] {
+  accent-color: var(--color-principal); /* Pinta el radio-button de nuestro color */
+}
+
+/* Botón y enlace */
+.registro-form .boton-primario {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.link-login {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.link-login a {
+  color: var(--color-principal);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Mensaje de error */
+.error-mensaje {
+  color: #D8000C;
+  background-color: #FFD2D2;
+  border: 1px solid #D8000C;
+  padding: 0.75rem;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}

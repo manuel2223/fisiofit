@@ -1,0 +1,62 @@
+/* En cliente/src/components/TarjetaRutina.css */
+
+.tarjeta-rutina {
+  /* La clase 'tarjeta' de index.css ya nos da el fondo y borde */
+  margin-bottom: 2rem;
+}
+
+.tarjeta-rutina h3 {
+  color: var(--color-principal);
+  border-bottom: 2px solid var(--color-acento);
+  padding-bottom: 0.5rem;
+}
+
+.tarjeta-rutina .creador {
+  font-style: italic;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.8;
+}
+
+.lista-ejercicios {
+  list-style: none;
+  padding: 0;
+}
+
+.ejercicio-item {
+  background-color: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.ejercicio-item .nombre {
+  font-weight: 600;
+  font-size: 1.1rem;
+  display: block; /* Para que ocupe su propia línea */
+}
+
+.ejercicio-item .series {
+  font-weight: 500;
+  color: var(--color-principal);
+  display: block;
+  margin-bottom: 1rem;
+}
+
+/* Estilos para el video de YouTube responsive */
+.video-container {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  padding-top: 56.25%; /* Proporción 16:9 (9 / 16 * 100) */
+  margin-top: 1rem;
+}
+
+.video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}

@@ -1,0 +1,100 @@
+/* En cliente/src/pages/ReservarCitaPage.css */
+
+.container-reserva {
+  width: 90%;
+  max-width: 1100px;
+  margin: 2rem auto;
+}
+
+.container-reserva h2 {
+  text-align: center;
+  color: var(--color-principal);
+  margin-bottom: 2rem;
+}
+
+.reserva-layout {
+  display: flex;
+  flex-wrap: wrap; /* Para que en móviles se ponga uno debajo de otro */
+  gap: 2rem;
+}
+
+.calendario-container {
+  flex: 1.5; /* Que el calendario ocupe más */
+  min-width: 320px;
+}
+
+.horas-container {
+  flex: 1; /* Que las horas ocupen menos */
+  min-width: 300px;
+}
+
+.horas-container h3 {
+  color: var(--color-texto);
+  border-bottom: 2px solid var(--color-principal);
+  padding-bottom: 0.5rem;
+}
+
+.horas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.hora-boton {
+  background-color: var(--color-acento);
+  color: var(--color-texto);
+  border: none;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.hora-boton:hover {
+  background-color: #70c480;
+  transform: translateY(-2px);
+}
+
+.hora-boton:disabled {
+  background-color: var(--color-borde);
+  color: #999;
+  cursor: not-allowed;
+  transform: none;
+}
+
+
+/* --- Estilos para personalizar React-Calendar --- */
+
+/* Borde y sombra general */
+.react-calendar {
+  width: 100%;
+  border: 1px solid var(--color-borde);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  padding: 1rem;
+}
+
+/* Color del día de hoy */
+.react-calendar__tile--now {
+  background: var(--color-fondo);
+  color: var(--color-principal);
+  font-weight: bold;
+}
+
+/* Color del día seleccionado */
+.react-calendar__tile--active {
+  background: var(--color-principal) !important;
+  color: var(--color-blanco) !important;
+}
+.react-calendar__tile--active:hover {
+  background: var(--color-principal) !important;
+}
+
+/* Botones de navegación (Mes/Año) */
+.react-calendar__navigation button {
+  color: var(--color-principal);
+  font-weight: bold;
+}

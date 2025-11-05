@@ -1,0 +1,67 @@
+/* En cliente/src/pages/LoginPage.css */
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 2rem;
+}
+
+.login-form {
+  width: 100%;
+  max-width: 450px; /* Ancho máximo del formulario */
+  padding: 2rem;
+}
+
+.login-form h2 {
+  text-align: center;
+  color: var(--color-principal);
+  margin-bottom: 2rem;
+}
+
+.form-grupo {
+  margin-bottom: 1.5rem;
+}
+
+.form-grupo label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.form-grupo input {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+}
+
+/* El botón ya tiene estilo de .boton-primario, pero lo centramos */
+.login-form .boton-primario {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.link-registro {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.link-registro a {
+  color: var(--color-principal);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Mensaje de error */
+.error-mensaje {
+  color: #D8000C; /* Rojo error */
+  background-color: #FFD2D2;
+  border: 1px solid #D8000C;
+  padding: 0.75rem;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}

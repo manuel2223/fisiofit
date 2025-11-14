@@ -24,7 +24,7 @@ function LoginPage() {
       // 2. Llamamos a la API de LOGIN
       const respuesta = await api.post('/auth/login', loginData);
 
-      login(respuesta.data.token);
+      login(respuesta.data.token, respuesta.data.rol); // 3. Llama a 'login' con token y rol
       navigate('/'); // Redirigimos a la página de inicio
 
     } catch (errorApi) {

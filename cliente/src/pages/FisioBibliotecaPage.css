@@ -1,0 +1,152 @@
+/* En cliente/src/pages/FisioBibliotecaPage.css */
+
+.biblioteca-container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 2rem auto;
+}
+
+.biblioteca-container h2 {
+  text-align: center;
+  color: var(--color-principal);
+  margin-bottom: 2rem;
+}
+
+.biblioteca-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+/* Estilos para el formulario */
+.form-biblioteca {
+  padding: 2rem;
+}
+.form-biblioteca h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: var(--color-principal);
+}
+.form-biblioteca .form-grupo input,
+.form-biblioteca .form-grupo textarea,
+.form-biblioteca .form-grupo select {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+}
+.form-biblioteca .form-grupo textarea {
+  min-height: 80px;
+  font-family: inherit;
+}
+.form-biblioteca .boton-primario {
+  width: 100%;
+}
+
+/* Estilos para la lista */
+.lista-biblioteca {
+  padding: 2rem;
+}
+.lista-biblioteca h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: var(--color-principal);
+}
+.ejercicio-bib-item {
+  border: 1px solid var(--color-borde);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+.categoria-tag {
+  display: inline-block;
+  background-color: var(--color-acento);
+  color: var(--color-texto);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-right: 1rem;
+}
+
+.ejercicio-bib-item {
+  border: 1px solid var(--color-borde);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  /* NUEVO: Alinear items */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.ejercicio-bib-item .info {
+  flex-grow: 1;
+}
+
+.acciones-bib {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.boton-editar {
+  background-color: transparent;
+  color: var(--color-principal);
+  border: 2px solid var(--color-principal);
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.boton-borrar {
+  background-color: transparent;
+  color: #E53E3E;
+  border: 2px solid #E53E3E;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.form-categoria {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-categoria .form-grupo {
+  margin-bottom: 0;
+}
+
+.error-mensaje-inline {
+  color: #D8000C;
+  font-size: 0.9rem;
+}
+
+.lista-categorias {
+  list-style: none;
+  padding: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.lista-categorias li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.boton-borrar-cat {
+  background-color: transparent;
+  color: #E53E3E;
+  border: none;
+  font-weight: bold;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 0.5rem;
+}

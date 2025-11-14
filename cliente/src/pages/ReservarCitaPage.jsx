@@ -1,20 +1,82 @@
 // En cliente/src/pages/ReservarCitaPage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css'; // Estilos base del calendario
-import './ReservarCitaPage.css'; // Nuestros estilos para el calendario
+import api from '../api';
+import 'react-calendar/dist/Calendar.css';
+import './ReservarCitaPage.css';
+
+// --- HORARIOS DE LA CLÍNICA (Personalízalo) ---
+// Define todos los horarios posibles
+const HORARIOS_BASE = [
+  '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
+  '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30'
+];
 
 function ReservarCitaPage() {
-  // 1. Estado para guardar la fecha que el usuario selecciona
-  // Por defecto, es la fecha de hoy (new Date())
   const [fechaSeleccionada, setFechaSeleccionada] = useState(new Date());
+  const [horariosOcupados, setHorariosOcupados] = useState([]);
+  const [horaSeleccionada, setHoraSeleccionada] = useState(null);
+  const [cargandoHoras, setCargandoHoras] = useState(false);
+  const navigate = useNavigate();
 
-  // 2. Función que se ejecuta cuando el usuario hace clic en un día
-  const handleFechaChange = (fecha) => {
-    setFechaSeleccionada(fecha);
-    // Aquí, en el futuro, llamarías a la API para
-    // buscar las horas disponibles de ESE día
-    console.log("Fecha seleccionada:", fecha);
+  // 1. Efecto que se dispara cada vez que el usuario cambia la fecha
+  useEffect(() => {
+    // Resetea la hora seleccionada
+    setHoraSeleccionada(null);
+    setCargandoHoras(true);
+
+    // Formatea la fecha a YYYY-MM-DD
+    const anio = fechaSeleccionada.getFullYear();
+    const mes = String(fechaSeleccionada.getMonth() + 1).padStart(2, '0');
+    const dia = String(fechaSeleccionada.getDate()).padStart(2, '0');
+    const fechaFormatoAPI = `${anio}-${mes}-${dia}`;
+
+    // Llama a la API para obtener las horas ocupadas de ESE día
+    api.get(`/citas/disponibilidad/${fechaFormatoAPI}`)
+      .then(respuesta => {
+        setHorariosOcupados(respuesta.data);
+      })
+      .catch(error => {
+        console.error("Error al cargar horarios:", error);
+        alert("No se pudieron cargar los horarios. ¿Has iniciado sesión?");
+      })
+      .finally(() => {
+        setCargandoHoras(false);
+      });
+
+  }, [fechaSeleccionada]); // Depende de esta variable
+
+  // 2. Función para manejar la confirmación
+  const handleConfirmarReserva = async () => {
+    if (!horaSeleccionada) {
+      alert("Por favor, selecciona una hora.");
+      return;
+    }
+
+    try {
+      // Combina la fecha seleccionada con la hora seleccionada
+      const [hora, minuto] = horaSeleccionada.split(':');
+      
+      const fechaHoraInicio = new Date(fechaSeleccionada);
+      fechaHoraInicio.setHours(hora, minuto, 0, 0); // Establece la hora de inicio
+      
+      // Asume que las citas duran 30 minutos (ajusta si es necesario)
+      const fechaHoraFin = new Date(fechaHoraInicio.getTime() + 30 * 60000);
+
+      // Envía la nueva cita a la API
+      await api.post('/citas/reservar', { 
+        fechaHoraInicio: fechaHoraInicio.toISOString(),
+        fechaHoraFin: fechaHoraFin.toISOString()
+      });
+
+      alert('¡Cita reservada con éxito!');
+      navigate('/mi-cuenta'); // O a una página de "mis citas"
+
+    } catch (error) {
+      console.error("Error al reservar:", error);
+      alert("Error al reservar la cita. Inténtalo de nuevo.");
+    }
   };
 
   return (
@@ -26,10 +88,9 @@ function ReservarCitaPage() {
         {/* Columna 1: El Calendario */}
         <div className="calendario-container">
           <Calendar
-            onChange={handleFechaChange}
+            onChange={setFechaSeleccionada} // Actualiza la fecha seleccionada
             value={fechaSeleccionada}
-            // (Opcional) No permitir seleccionar días anteriores a hoy
-            minDate={new Date()} 
+            minDate={new Date()} // No permite reservar en el pasado
           />
         </div>
 
@@ -38,14 +99,39 @@ function ReservarCitaPage() {
           <h3>Horas disponibles para:</h3>
           <p>{fechaSeleccionada.toLocaleDateString('es-ES', { dateStyle: 'long' })}</p>
           
-          {/* Esto es estático por ahora, luego vendrá de la API */}
-          <div className="horas-grid">
-            <button className="hora-boton">09:00</button>
-            <button className="hora-boton">09:30</button>
-            <button className="hora-boton" disabled>10:00 (No disponible)</button>
-            <button className="hora-boton">10:30</button>
-            <button className="hora-boton">11:00</button>
-          </div>
+          {cargandoHoras ? (
+            <p>Cargando horas...</p>
+          ) : (
+            <div className="horas-grid">
+              {HORARIOS_BASE.map(hora => {
+                // Comprueba si la hora está en la lista de ocupadas
+                const estaOcupada = horariosOcupados.includes(hora);
+                const esSeleccionada = hora === horaSeleccionada;
+
+                return (
+                  <button 
+                    key={hora}
+                    className={`hora-boton ${esSeleccionada ? 'seleccionada' : ''}`}
+                    disabled={estaOcupada}
+                    onClick={() => setHoraSeleccionada(hora)}
+                  >
+                    {hora}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Botón de Confirmar */}
+          {horaSeleccionada && (
+            <button 
+              className="boton-primario" 
+              style={{width: '100%', marginTop: '2rem'}}
+              onClick={handleConfirmarReserva}
+            >
+              Confirmar reserva a las {horaSeleccionada}
+            </button>
+          )}
         </div>
       </div>
     </div>

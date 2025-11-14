@@ -1,5 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
+const sequelize = require('../../4_infrastructure/database/db'); 
+
 
 class Cita extends Model {}
 

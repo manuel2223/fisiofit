@@ -3,6 +3,8 @@ const Usuario = require('./Usuario');
 const Cita = require('./Cita');
 const Rutina = require('./Rutina');
 const Ejercicio = require('./Ejercicio');
+const EjercicioBiblioteca = require('./EjercicioBiblioteca'); 
+const Categoria = require('./Categoria');
 
 // 1. Relaciones de Cita
 // Un Usuario (Paciente) tiene muchas Citas
@@ -27,10 +29,20 @@ Rutina.belongsTo(Usuario, { foreignKey: 'fisioterapeutaCreadorId', as: 'fisioter
 Rutina.hasMany(Ejercicio, { foreignKey: 'rutinaId', onDelete: 'CASCADE', as: 'ejercicios' }); // Si se borra la rutina, se borran sus ejercicios
 Ejercicio.belongsTo(Rutina, { foreignKey: 'rutinaId' });
 
+Usuario.hasMany(EjercicioBiblioteca, { foreignKey: 'fisioterapeutaId' });
+EjercicioBiblioteca.belongsTo(Usuario, { foreignKey: 'fisioterapeutaId' });
+
+// 3. AÑADE LA NUEVA RELACIÓN DE CATEGORÍA
+// Una Categoría tiene muchos Ejercicios
+Categoria.hasMany(EjercicioBiblioteca, { foreignKey: 'categoriaId' });
+EjercicioBiblioteca.belongsTo(Categoria, { as: 'categoria', foreignKey: 'categoriaId' });
+
 // Exportamos todos los modelos para usarlos en la API
 module.exports = {
   Usuario,
   Cita,
   Rutina,
-  Ejercicio
+  Ejercicio,
+  EjercicioBiblioteca,
+  Categoria
 };

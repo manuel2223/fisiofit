@@ -1,49 +1,55 @@
 // En cliente/src/context/AuthContext.jsx
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
-// 1. Creamos el Contexto
 const AuthContext = createContext();
 
-// 2. Creamos el "Proveedor" (el componente que envuelve la app)
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
+  const [rol, setRol] = useState(null); // <-- AÑADIR ESTADO PARA EL ROL
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [cargando, setCargando] = useState(true); // Para saber si ya comprobamos el token
+  const [cargando, setCargando] = useState(true);
 
-  // 3. Comprueba el localStorage CUANDO la app se carga por primera vez
   useEffect(() => {
     const tokenAlmacenado = localStorage.getItem('token');
-    if (tokenAlmacenado) {
+    const rolAlmacenado = localStorage.getItem('rol'); // <-- BUSCA EL ROL GUARDADO
+    
+    if (tokenAlmacenado && rolAlmacenado) {
       setToken(tokenAlmacenado);
+      setRol(rolAlmacenado); // <-- RECUPERA EL ROL
       setIsLoggedIn(true);
     }
-    setCargando(false); // Terminamos de cargar
-  }, []); // El [] significa que solo se ejecuta 1 vez
+    setCargando(false);
+  }, []);
 
-  // 4. Función para Iniciar Sesión (la usará LoginPage)
-  const login = (newToken) => {
+  // 4. Modifica 'login' para aceptar el rol
+  const login = (newToken, newRol) => {
     localStorage.setItem('token', newToken);
+    localStorage.setItem('rol', newRol); // <-- GUARDA EL ROL
     setToken(newToken);
+    setRol(newRol); // <-- ESTABLECE EL ROL
     setIsLoggedIn(true);
   };
 
-  // 5. Función para Cerrar Sesión (la usará el Navbar)
+  // 5. Modifica 'logout' para limpiar el rol
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('rol'); // <-- LIMPIA EL ROL
     setToken(null);
+    setRol(null); // <-- LIMPIA EL ROL
     setIsLoggedIn(false);
   };
 
-  // 6. Valor que compartiremos con toda la app
+  // 6. Expone el 'rol' en el valor del contexto
   const value = {
     token,
+    rol, // <-- EXPONER ROL
     isLoggedIn,
-    cargando, // Importante para que no "parpadee" el login
+    cargando,
     login,
     logout
   };
-
-  // 7. Si aún está cargando, no mostramos nada para evitar parpadeos
+  
+  // ... (el resto del archivo se queda igual)
   if (cargando) {
     return null;
   }
@@ -51,7 +57,6 @@ export function AuthProvider({ children }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// 8. Hook personalizado para usar el contexto más fácil
 export function useAuth() {
   return useContext(AuthContext);
 }

@@ -1,7 +1,7 @@
 // En servidor/routes/auth.js
 const express = require('express');
 const router = express.Router();
-const { Usuario } = require('../models'); // Importamos el modelo Usuario
+const { Usuario } = require('../../3_domain/models'); // Importamos el modelo Usuario
 const jwt = require('jsonwebtoken'); // <-- ESTA LÍNEA ES LA QUE FALTA
 const authMiddleware = require('../middleware/authMiddleware');
 
@@ -132,6 +132,50 @@ router.get('/me', authMiddleware, async (req, res) => {
 
   } catch (error) {
     console.error('Error al obtener datos del usuario:', error);
+    res.status(500).json({ msg: 'Error interno del servidor.' });
+  }
+});
+
+// --- RUTA PARA ACTUALIZAR (EDITAR) DATOS DEL USUARIO ---
+// PUT /api/auth/me
+router.put('/me', [authMiddleware], async (req, res) => {
+  const { nombre, email, password } = req.body;
+  
+  try {
+    // 1. Busca al usuario en la BBDD usando el token
+    const usuario = await Usuario.findByPk(req.usuario.id);
+    if (!usuario) {
+      return res.status(404).json({ msg: 'Usuario no encontrado.' });
+    }
+
+    // 2. Actualiza los campos
+    usuario.nombre = nombre || usuario.nombre; // Si no viene, deja el que estaba
+    usuario.email = email || usuario.email;
+
+    // 3. ¡IMPORTANTE! Manejo de la contraseña
+    if (password && password.length >= 6) {
+      usuario.password = password; // ¡El hook 'beforeUpdate' se encargará de hashearlo!
+    }
+
+    // 4. Guarda los cambios
+    await usuario.save();
+
+    // 5. Devuelve el usuario actualizado (sin la contraseña)
+    const usuarioActualizado = {
+      id: usuario.id,
+      nombre: usuario.nombre,
+      email: usuario.email,
+      rol: usuario.rol
+    };
+
+    res.json({ msg: 'Datos actualizados correctamente.', usuario: usuarioActualizado });
+
+  } catch (error) {
+    console.error('Error al actualizar usuario:', error);
+    // Error si el email ya existe
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(400).json({ msg: 'El email ya está en uso por otra cuenta.' });
+    }
     res.status(500).json({ msg: 'Error interno del servidor.' });
   }
 });

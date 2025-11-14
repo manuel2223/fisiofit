@@ -1,0 +1,105 @@
+/* En cliente/src/pages/FisioDashboardPage.css */
+
+
+
+
+.dashboard-container {
+  width: 90%;
+  max-width: 900px;
+  margin: 2rem auto;
+}
+
+.dashboard-container h2 {
+  text-align: center;
+  color: var(--color-principal);
+  margin-bottom: 2rem;
+}
+
+.dashboard-widget {
+  padding: 2rem;
+}
+
+.dashboard-widget h3 {
+  border-bottom: 2px solid var(--color-acento);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.lista-pacientes {
+  list-style: none;
+  padding: 0;
+}
+
+.lista-pacientes li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.lista-pacientes .nombre {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.lista-pacientes .email {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.boton-asignar {
+  /* Usamos el estilo del botón primario */
+  background-color: var(--color-acento);
+  color: var(--color-texto);
+  border: none;
+  padding: 8px 16px; /* Un poco más pequeño */
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.boton-asignar:hover {
+  background-color: #70c480;
+}
+
+.dashboard-container {
+  width: 90%;
+  max-width: 1400px; /* Más ancho para el calendario */
+  margin: 2rem auto;
+}
+
+.dashboard-container h2 {
+  text-align: center;
+  color: var(--color-principal);
+  margin-bottom: 2rem;
+}
+
+/* --- NUEVO: Layout de dos columnas --- */
+.dashboard-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.columna-calendario {
+  flex: 2; /* Que el calendario ocupe 2/3 */
+  min-width: 400px;
+}
+
+.columna-pacientes {
+  flex: 1; /* Que la lista ocupe 1/3 */
+  min-width: 300px;
+}
+/* --- Fin de Layout --- */
+
+
+.dashboard-widget {
+  padding: 2rem;
+  margin-bottom: 2rem; /* Añadimos esto por si no usamos el layout */
+}

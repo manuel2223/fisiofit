@@ -1,0 +1,167 @@
+/* En cliente/src/pages/AsignarRutinaPage.css */
+
+/* --- Contenedor Principal --- */
+.constructor-container {
+  width: 90%;
+  max-width: 1000px; /* Más ancho para dos columnas */
+  margin: 2rem auto;
+}
+.constructor-container .tarjeta {
+  padding: 2rem;
+}
+.constructor-container h2 {
+  text-align: center;
+  color: var(--color-principal);
+  margin-bottom: 2rem;
+}
+.constructor-container hr {
+  border: none;
+  border-top: 1px solid var(--color-borde);
+  margin: 1.5rem 0;
+}
+
+/* --- Layout de 2 Columnas --- */
+.constructor-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+/* --- Columna 1: Biblioteca --- */
+.constructor-biblioteca {
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  padding: 1rem;
+}
+.constructor-biblioteca h4, 
+.constructor-rutina h4 {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+/* Filtros de Categoría */
+.filtros-categoria {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.filtros-categoria button {
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.filtros-categoria button:hover {
+  background: var(--color-borde);
+}
+.filtros-categoria button.activo {
+  background: var(--color-principal);
+  color: var(--color-blanco);
+  border-color: var(--color-principal);
+}
+
+/* Barra de Búsqueda */
+.constructor-biblioteca .form-grupo input {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+}
+
+/* Lista de Ejercicios de la Biblioteca */
+.lista-biblioteca-picker {
+  list-style: none;
+  padding: 0;
+  margin-top: 1rem;
+  height: 300px; /* Altura fija con scroll */
+  overflow-y: auto;
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+}
+.lista-biblioteca-picker li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-borde);
+}
+.lista-biblioteca-picker li:last-child {
+  border-bottom: none;
+}
+.lista-biblioteca-picker button {
+  background: var(--color-acento);
+  color: var(--color-texto);
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 28px;
+  text-align: center;
+}
+
+/* --- Columna 2: Rutina --- */
+.constructor-rutina {
+  background-color: var(--color-fondo);
+  border-radius: 8px;
+  padding: 1rem;
+}
+.lista-rutina-builder {
+  list-style: none;
+  padding: 0;
+  height: 350px; /* Altura fija con scroll */
+  overflow-y: auto;
+}
+.ejercicio-bloque {
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  background-color: var(--color-blanco);
+  position: relative;
+}
+.ejercicio-bloque strong {
+  font-size: 1.1rem;
+  color: var(--color-principal);
+}
+.grupo-horizontal {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.grupo-horizontal .form-grupo {
+  flex: 1;
+  margin-bottom: 0;
+}
+.grupo-horizontal .form-grupo label {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+.grupo-horizontal .form-grupo input {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+}
+
+.boton-quitar-mini {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
+  color: #E53E3E;
+  border: 1px solid #E53E3E;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  padding: 2px 6px;
+  cursor: pointer;
+}

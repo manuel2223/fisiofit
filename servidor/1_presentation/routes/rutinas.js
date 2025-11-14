@@ -4,7 +4,7 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 
 // 1. SOLUCIÓN: Añade 'Usuario' a esta importación
-const { Rutina, Ejercicio, Usuario } = require('../models'); 
+const { Rutina, Ejercicio, Usuario } = require('../../3_domain/models'); 
 
 // 2. APLICA EL GUARDIA:
 router.get('/', authMiddleware, async (req, res) => {

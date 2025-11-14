@@ -1,11 +1,11 @@
-// En tu archivo principal (ej. app.js)
 const express = require('express');
-const sequelize = require('./config/db'); // Tu conexión
+// En servidor/app.js
+const sequelize = require('./4_infrastructure/database/db'); // <-- ESTA ES LA RUTA CORRECTA
 const cors = require('cors'); // 1. Importa CORS
 
 // Importa los modelos y relaciones
 // Esto es MUY IMPORTANTE, inicializa los modelos
-require('./models'); 
+require('./3_domain/models');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,8 +21,10 @@ app.get('/', (req, res) => {
 });
 
 // Cuando alguien vaya a '/api/auth', usa las rutas de 'auth.js'
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/rutinas', require('./routes/rutinas')); 
+app.use('/api/auth', require('./1_presentation/routes/auth'));
+app.use('/api/citas', require('./1_presentation/routes/citas'));
+app.use('/api/fisio', require('./1_presentation/routes/fisio'));
+app.use('/api/rutinas', require('./1_presentation/routes/rutinas'));
 
 // Sincronización con la base de datos
 async function startServer() {

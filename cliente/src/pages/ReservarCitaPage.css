@@ -98,3 +98,9 @@
   color: var(--color-principal);
   font-weight: bold;
 }
+
+.hora-boton.seleccionada {
+  background-color: var(--color-principal);
+  color: var(--color-blanco);
+  transform: scale(1.05);
+}

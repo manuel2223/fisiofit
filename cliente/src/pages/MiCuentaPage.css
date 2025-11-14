@@ -1,13 +1,16 @@
 /* En cliente/src/pages/MiCuentaPage.css */
 
+/* 1. Cambiamos el contenedor a un layout de 2 columnas */
 .mi-cuenta-container {
   width: 90%;
-  max-width: 700px;
-  margin: 4rem auto;
-  display: flex;
-  justify-content: center;
+  max-width: 1200px; /* Más ancho */
+  margin: 2rem auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Dos columnas */
+  gap: 2rem;
 }
 
+/* 2. Estilos para la tarjeta de formulario */
 .mi-cuenta-tarjeta {
   width: 100%;
   padding: 2rem;
@@ -19,18 +22,25 @@
   margin-bottom: 2rem;
 }
 
-.detalle-cuenta p {
-  font-size: 1.1rem;
-  margin-bottom: 1rem;
+/* (Reutilizamos los estilos de .form-grupo de otros CSS) */
+.form-grupo {
+  margin-bottom: 1.5rem;
 }
-
-.detalle-cuenta p strong {
-  color: var(--color-principal);
+.form-grupo label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.form-grupo input {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
 }
 
 .boton-logout {
-  /* Copiamos el estilo del boton-primario pero en rojo */
-  background-color: #E53E3E; /* Rojo */
+  background-color: #E53E3E;
   color: var(--color-blanco);
   border: none;
   padding: 12px 24px;
@@ -38,12 +48,113 @@
   font-weight: 600;
   border-radius: 8px;
   cursor: pointer;
-  text-decoration: none;
   transition: background-color 0.3s ease;
   width: 100%;
-  margin-top: 2rem;
+  margin-top: 1rem; /* Espacio entre botones */
+}
+.boton-logout:hover {
+  background-color: #C53030;
 }
 
-.boton-logout:hover {
-  background-color: #C53030; /* Rojo más oscuro */
+/* Mensajes de feedback */
+.error-mensaje {
+  color: #D8000C;
+  background-color: #FFD2D2;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+.exito-mensaje {
+  color: #270;
+  background-color: #DFF2BF;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+
+/* --- 3. NUEVOS ESTILOS PARA LA LISTA DE CITAS --- */
+.mis-citas-tarjeta {
+  width: 100%;
+  padding: 2rem;
+}
+.mis-citas-tarjeta h2 {
+  text-align: center;
+  color: var(--color-principal);
+  margin-bottom: 2rem;
+}
+.lista-citas {
+  list-style: none;
+  padding: 0;
+  max-height: 600px;
+  overflow-y: auto;
+}
+.cita-item {
+  background-color: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 0.25rem 1rem;
+  align-items: center;
+}
+.cita-fecha {
+  font-size: 1.1rem;
+  font-weight: 600;
+  grid-column: 1 / 2;
+  color: var(--color-principal);
+}
+.cita-hora {
+  font-size: 1.1rem;
+  font-weight: 600;
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+  text-align: right;
+}
+.cita-fisio {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  grid-column: 1 / 2;
+}
+.cita-estado {
+  grid-column: 2 / 3;
+  grid-row: 2 / 3;
+  text-align: right;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: capitalize;
+}
+.cita-estado.confirmada {
+  color: #28a745; /* Verde */
+}
+.cita-estado.pendiente {
+  color: #ffc107; /* Amarillo */
+}
+
+
+/* 2. NUEVO ESTILO para el botón de cancelar */
+.boton-cancelar-cita {
+  grid-column: 1 / -1; /* Ocupa todo el ancho */
+  grid-row: 3; /* Ponlo en la tercera fila */
+  
+  background-color: transparent;
+  color: #E53E3E; /* Rojo */
+  border: 1px solid #E53E3E;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 0.75rem; /* Espacio superior */
+  transition: all 0.2s ease;
+}
+
+.boton-cancelar-cita:hover {
+  background-color: #E53E3E;
+  color: white;
 }

@@ -1,27 +1,33 @@
 // En cliente/src/components/Navbar.jsx
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // 1. Importa el hook
 
-// Estilos que definimos antes
+import React from 'react';
+import { Link } from 'react-router-dom'; // Importamos Link
+import { useAuth } from '../context/AuthContext'; // Importamos el hook de Auth
+import logoFisioFit from '../assets/logofisiofit.png';
+
+// Tus estilos (no los toques, están bien)
 const styles = {
   navbar: {
     backgroundColor: 'var(--color-blanco)',
     borderBottom: '1px solid var(--color-borde)',
-    padding: '1rem 5%', // Usamos 5% en lugar de 'container'
+    padding: '1rem 5%',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  navLogo: {
-    color: 'var(--color-principal)',
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
+  logoLink: {
+    display: 'flex',
+    alignItems: 'center',
     textDecoration: 'none',
+  },
+  logoImage: {
+    height: '40px', // Ajusta esta altura como veas
+    width: 'auto',
   },
   navLinks: {
     display: 'flex',
     gap: '1.5rem',
+    alignItems: 'center', // Alinea los botones con los enlaces
   },
   navLink: {
     color: 'var(--color-texto)',
@@ -30,35 +36,44 @@ const styles = {
   }
 };
 
-function Navbar() {
-  // 2. Quitamos 'logout' y 'navigate' de aquí
-  const { isLoggedIn } = useAuth();
 
-  // 3. Borramos la función handleLogout
+function Navbar() {
+  // 1. Traemos el estado (isLoggedIn) y el (rol) del contexto
+  const { isLoggedIn, rol } = useAuth();
 
   return (
     <nav style={styles.navbar}>
-      <Link to="/" style={styles.navLogo}>FisioApp</Link>
+      {/* --- SECCIÓN IZQUIERDA (Logo) --- */}
+      <Link to="/" style={styles.navLogo}><img src={logoFisioFit} alt="Logo FisioFit" style={styles.logoImage} /></Link>
       
+      {/* --- SECCIÓN CENTRAL (Navegación principal) --- */}
       <div style={styles.navLinks}>
         <Link to="/" style={styles.navLink}>Inicio</Link>
+        
+        {/* 1. MUEVE ESTE ENLACE AFUERA DE LA CONDICIÓN */}
         <Link to="/reservar" style={styles.navLink}>Reservar Cita</Link>
+        
 
-        {isLoggedIn && (
+        {/* Enlace para Pacientes */}
+        {isLoggedIn && rol === 'paciente' && (
           <Link to="/rutinas" style={styles.navLink}>Mis Rutinas</Link>
+        )}
+        
+        {/* Enlace para Fisioterapeutas */}
+        {isLoggedIn && rol === 'fisioterapeuta' && (
+          <Link to="/fisio/dashboard" style={styles.navLink}>Dashboard</Link>
         )}
       </div>
 
+      {/* --- SECCIÓN DERECHA (Login/Mi Cuenta) --- */}
       <div style={styles.navLinks}>
-        {/* 4. MODIFICAMOS EL BLOQUE FINAL */}
         {isLoggedIn ? (
+          // Si está logueado, muestra "Mi Cuenta"
           <>
-            {/* El enlace a "Mi Cuenta" ya estaba */}
             <Link to="/mi-cuenta" style={styles.navLink}>Mi Cuenta</Link>
-            
-            {/* El botón de logout SE QUITA DE AQUÍ */}
           </>
         ) : (
+          // Si no, muestra "Login"
           <Link to="/login" style={styles.navLink}>Login</Link>
         )}
       </div>

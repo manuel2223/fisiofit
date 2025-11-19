@@ -1,17 +1,15 @@
 // En cliente/src/components/TarjetaRutina.jsx
 import React from 'react';
-import './TarjetaRutina.css'; // Crearemos este CSS ahora
+import { Link } from 'react-router-dom'; // <-- ¡ESTA ES LA LÍNEA QUE FALTABA!
+import './TarjetaRutina.css';
 
-// Este componente recibe la 'rutina' como un "prop"
 function TarjetaRutina({ rutina }) {
 
   return (
-    <div className="tarjeta-rutina tarjeta"> {/* Usamos la clase 'tarjeta' que ya definimos */}
+    <div className="tarjeta-rutina tarjeta">
       <h3>{rutina.nombre}</h3>
-      <p className="creador">Asignada por: 
-        <strong>
-          {rutina.fisioterapeutaCreador ? rutina.fisioterapeutaCreador.nombre : 'Doctor'}
-        </strong>
+      <p className="creador">
+        Asignada por: <strong>{rutina.fisioterapeutaCreador ? rutina.fisioterapeutaCreador.nombre : 'Doctor'}</strong>
       </p>
 
       <h4>Ejercicios:</h4>
@@ -21,7 +19,7 @@ function TarjetaRutina({ rutina }) {
             <span className="nombre">{ejercicio.nombreEjercicio}</span>
             <span className="series">{ejercicio.series} x {ejercicio.repeticiones} reps</span>
             
-            {/* Si hay video, mostramos un enlace/reproductor */}
+            {/* Contenedor del Video (si existe) */}
             {ejercicio.videoUrl && (
               <div className="video-container">
                 <iframe
@@ -32,6 +30,18 @@ function TarjetaRutina({ rutina }) {
                   allowFullScreen
                 ></iframe>
               </div>
+            )}
+
+            {/* ¡EL NUEVO BOTÓN QUE AÑADIMOS! */}
+            {/* Solo se muestra si el ejercicio tiene reglas de postura */}
+            {ejercicio.reglasPostura && (
+              <Link 
+                to={`/entrenar/${ejercicio.id}`} 
+                className="boton-primario"
+                style={{textDecoration: 'none', marginTop: '1rem', display: 'block', textAlign: 'center'}}
+              >
+                Comprobar Postura con IA
+              </Link>
             )}
           </li>
         ))}

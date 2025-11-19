@@ -31,6 +31,11 @@ Ejercicio.init({
   repeticiones: {
     type: DataTypes.INTEGER,
     allowNull: true
+  },
+
+  reglasPostura: {
+    type: DataTypes.JSON,
+    allowNull: true
   }
   // La clave foránea (rutinaId) se añade en el Paso 2
 }, {

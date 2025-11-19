@@ -26,4 +26,30 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
+
+// --- RUTA PARA OBTENER UN EJERCICIO ESPECÍFICO (PARA LA IA) ---
+// GET /api/rutinas/ejercicio/:id
+router.get('/ejercicio/:id', [authMiddleware], async (req, res) => {
+  try {
+    const ejercicio = await Ejercicio.findByPk(req.params.id);
+    if (!ejercicio) {
+      return res.status(404).json({ msg: 'Ejercicio no encontrado.' });
+    }
+
+    // --- ¡SEGURIDAD! ---
+    // Comprueba que este ejercicio pertenece a una rutina de este paciente
+    const rutina = await Rutina.findByPk(ejercicio.rutinaId);
+    if (rutina.pacienteAsignadoId !== req.usuario.id) {
+      return res.status(403).json({ msg: 'Acceso denegado.' });
+    }
+
+    // Si todo OK, envía el ejercicio (con sus reglas)
+    res.json(ejercicio);
+
+  } catch (error) {
+    console.error('Error al obtener ejercicio:', error);
+    res.status(500).json({ msg: 'Error interno del servidor.' });
+  }
+});
+
 module.exports = router;

@@ -1,0 +1,99 @@
+/* En cliente/src/pages/EjercicioEntrenamientoPage.css */
+
+.entrenamiento-container {
+  width: 90%;
+  max-width: 800px;
+  margin: 2rem auto;
+  text-align: center;
+}
+.entrenamiento-container h2 {
+  color: var(--color-principal);
+}
+
+/* --- NUEVO: Contenedor de Selección --- */
+.mode-selector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  background: var(--color-fondo);
+  border-radius: 8px;
+  margin: 1rem auto;
+}
+/* Reutilizamos el estilo del botón primario */
+.mode-selector .boton-primario,
+.mode-selector .boton-secundario {
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
+  text-decoration: none;
+}
+/* Reutilizamos el estilo del botón secundario para el label */
+.mode-selector .boton-secundario {
+  display: inline-block;
+  background-color: var(--color-blanco);
+  color: var(--color-principal);
+  border: 2px solid var(--color-principal);
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.mode-selector .boton-secundario:hover {
+  background-color: var(--color-fondo);
+}
+
+
+/* --- CONTENEDOR DE MEDIA MODIFICADO --- */
+.media-container {
+  position: relative; /* Clave para superponer el canvas */
+  width: 640px;
+  height: 480px;
+  margin: 1rem auto;
+  background-color: #000; /* Fondo negro para las bandas */
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* El video AHORA ES VISIBLE */
+#video-feed {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Rellena el contenedor */
+}
+/* Modo espejo para la webcam */
+#video-feed.mirror {
+  transform: scaleX(-1);
+}
+
+/* El canvas AHORA ESTÁ ENCIMA */
+#pose-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent; /* Fondo transparente */
+  pointer-events: none
+}
+
+/* La caja de feedback (sin cambios) */
+.feedback-box {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background-color: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+}
+.feedback-box h3 {
+  margin-top: 0;
+  color: var(--color-principal);
+}
+.feedback-box p {
+  font-size: 1.2rem;
+  font-weight: 600;
+  min-height: 50px;
+}

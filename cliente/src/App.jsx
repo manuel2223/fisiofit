@@ -12,6 +12,7 @@ import RutaProtegidaFisio from './components/RutaProtegidaFisio'; // <-- 1. Impo
 import FisioDashboardPage from './pages/FisioDashboardPage'; // <-- 2. Importa la nueva página
 import AsignarRutinaPage from './pages/AsignarRutinaPage'; // <-- 1. Importa la nueva página
 import FisioBibliotecaPage from './pages/FisioBibliotecaPage'; // <-- 1. Importa
+import EjercicioEntrenamientoPage from './pages/EjercicioEntrenamientoPage'; // <-- ¿Está esta línea?
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route element={<RutaProtegida />}>
             <Route path="/rutinas" element={<MisRutinasPage />} />
             <Route path="/reservar" element={<ReservarCitaPage />} />
+            <Route path="/entrenar/:ejercicioId" element={<EjercicioEntrenamientoPage />} />
             
             {/* 2. AÑADE LA NUEVA RUTA AQUÍ */}
             <Route path="/mi-cuenta" element={<MiCuentaPage />} />
@@ -38,6 +40,7 @@ function App() {
             {/* 2. AÑADE LA NUEVA RUTA CON PARÁMETRO */}
             <Route path="/fisio/asignar/:pacienteId" element={<AsignarRutinaPage />} />
             <Route path="/fisio/biblioteca" element={<FisioBibliotecaPage />} />
+            
           </Route>
           
         </Routes>

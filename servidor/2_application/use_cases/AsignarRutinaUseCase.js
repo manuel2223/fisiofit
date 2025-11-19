@@ -28,7 +28,8 @@ class AsignarRutinaUseCase {
       nombreEjercicio: ej.nombreEjercicio,
       series: ej.series,
       repeticiones: ej.repeticiones,
-      videoUrl: ej.videoUrl || null // Aseguramos que sea null si está vacío
+      videoUrl: ej.videoUrl || null, // Aseguramos que sea null si está vacío
+      reglasPostura: ej.reglasPostura || null
     }));
 
     // 3. Llamar al Repositorio para que haga el trabajo sucio

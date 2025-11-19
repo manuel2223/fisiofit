@@ -25,6 +25,10 @@ EjercicioBiblioteca.init({
       isUrl: true // Opcional: valida que sea una URL
     }
   },
+  reglasPostura: {
+    type: DataTypes.JSON,
+    allowNull: true // Es opcional, no todos los ejercicios tendrán IA
+  }
  
   // La clave foránea 'fisioterapeutaId' la añadiremos en models/index.js
 }, {

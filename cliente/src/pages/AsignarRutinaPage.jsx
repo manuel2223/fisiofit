@@ -72,7 +72,8 @@ function AsignarRutinaPage() {
         videoUrl: ejercicioDeBiblioteca.videoUrl || '',
         // Y añade los campos de la rutina
         series: 3, // Valor por defecto
-        repeticiones: 10 // Valor por defecto
+        repeticiones: 10, // Valor por defecto
+        reglasPostura: ejercicioDeBiblioteca.reglasPostura || null
       }
     ]);
   };

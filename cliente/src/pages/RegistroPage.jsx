@@ -1,80 +1,107 @@
+// En cliente/src/pages/RegistroPage.jsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '../api'; // <-- USAMOS NUESTRO ARCHIVO
-import './RegistroPage.css'; // Crearemos este CSS
+import axios from 'axios';
+import toast from 'react-hot-toast';
+import './RegistroPage.css';
 
 function RegistroPage() {
-  // 1. Estados para todos los campos del formulario
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [password2, setPassword2] = useState(''); // Para confirmar la contraseña
-  const [rol, setRol] = useState('paciente'); // Por defecto, se registra como paciente
-  const [error, setError] = useState('');
+  const [password2, setPassword2] = useState('');
+  const [rol, setRol] = useState('paciente');
+  
+  const [erroresCampos, setErroresCampos] = useState({});
 
-  const navigate = useNavigate(); // 3. Hook para redirigir
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setErroresCampos({});
 
-    // (Validaciones del frontend se quedan igual)
-    if (!nombre || !email || !password || !password2) {
-      setError('Por favor, rellena todos los campos.');
+    // --- VALIDACIÓN VISUAL ---
+    const nuevosErrores = {};
+    let hayError = false;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!nombre.trim()) { nuevosErrores.nombre = true; hayError = true; }
+    
+    // Validación Email
+    if (!email.trim()) { 
+      nuevosErrores.email = true; 
+      hayError = true; 
+    } else if (!emailRegex.test(email)) {
+      nuevosErrores.email = true;
+      toast.error('El formato del email no es válido.');
+      hayError = true;
+    }
+
+    if (!password) { nuevosErrores.password = true; hayError = true; }
+    if (!password2) { nuevosErrores.password2 = true; hayError = true; }
+
+    // Validaciones específicas de contraseña
+    if (password && password !== password2) {
+      nuevosErrores.password = true;
+      nuevosErrores.password2 = true;
+      toast.error('Las contraseñas no coinciden.');
+      hayError = true;
+    } else if (password && password.length < 6) {
+      nuevosErrores.password = true;
+      toast.error('La contraseña debe tener al menos 6 caracteres.');
+      hayError = true;
+    }
+
+    if (hayError) {
+      setErroresCampos(nuevosErrores);
+      // Si no hay mensaje específico (email o pass), mostrar genérico
+      if (!nuevosErrores.email && !nuevosErrores.password) {
+         toast.error('Por favor, revisa los campos marcados.');
+      }
       return;
     }
-    if (password !== password2) {
-      setError('Las contraseñas no coinciden.');
-      return;
-    }
-    // (El resto de validaciones...)
+    // ------------------------
+
+    const toastId = toast.loading('Creando cuenta...');
 
     try {
-      // 4. Creamos el objeto con los datos a enviar
-      const nuevoUsuario = {
-        nombre,
-        email,
-        password,
-        rol
-      };
-
-      // 5. ¡LA LLAMADA A LA API!
-      const respuesta = await api.post('/auth/registro', nuevoUsuario);
-
-      // 6. Si todo va bien
-      console.log('Usuario registrado:', respuesta.data);
+      const nuevoUsuario = { nombre, email, password, rol };
+      const API_URL = 'http://localhost:5000/api/auth/registro';
       
-      // (Opcional) Redirigimos al login tras un registro exitoso
-      alert('¡Registro exitoso! Por favor, inicia sesión.');
+      await axios.post(API_URL, nuevoUsuario);
+
+      toast.success('¡Cuenta creada! Por favor, inicia sesión.', { id: toastId });
       navigate('/login');
 
     } catch (errorApi) {
-      // 7. Si la API nos da un error (ej. email duplicado)
       console.error('Error al registrar:', errorApi);
-      if (errorApi.response && errorApi.response.data && errorApi.response.data.msg) {
-        // Mostramos el error que nos envía el backend (ej. "El email ya existe")
-        setError(errorApi.response.data.msg);
-      } else {
-        setError('Ocurrió un error al registrar. Inténtalo de nuevo.');
+      const msg = errorApi.response?.data?.msg || 'Ocurrió un error al registrar.';
+      
+      if (msg.includes('email') || msg.includes('correo')) {
+        setErroresCampos({ email: true });
       }
+      
+      toast.error(msg, { id: toastId });
     }
   };
 
   return (
     <div className="registro-container">
-      <form className="registro-form tarjeta" onSubmit={handleSubmit}>
+      {/* Añadimos noValidate */}
+      <form className="registro-form tarjeta" onSubmit={handleSubmit} noValidate>
         <h2>Crear Cuenta</h2>
         
-        {error && <p className="error-mensaje">{error}</p>}
-
         <div className="form-grupo">
           <label htmlFor="nombre">Nombre Completo</label>
           <input 
             type="text" 
             id="nombre" 
             value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            required 
+            className={erroresCampos.nombre ? 'input-error' : ''}
+            onChange={(e) => {
+              setNombre(e.target.value);
+              if(erroresCampos.nombre) setErroresCampos({...erroresCampos, nombre: false});
+            }} 
           />
         </div>
 
@@ -84,8 +111,11 @@ function RegistroPage() {
             type="email" 
             id="email" 
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required 
+            className={erroresCampos.email ? 'input-error' : ''}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if(erroresCampos.email) setErroresCampos({...erroresCampos, email: false});
+            }} 
           />
         </div>
 
@@ -95,8 +125,11 @@ function RegistroPage() {
             type="password" 
             id="password" 
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required 
+            className={erroresCampos.password ? 'input-error' : ''}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if(erroresCampos.password) setErroresCampos({...erroresCampos, password: false, password2: false});
+            }} 
           />
         </div>
 
@@ -106,8 +139,11 @@ function RegistroPage() {
             type="password" 
             id="password2" 
             value={password2}
-            onChange={(e) => setPassword2(e.target.value)}
-            required 
+            className={erroresCampos.password2 ? 'input-error' : ''}
+            onChange={(e) => {
+              setPassword2(e.target.value);
+              if(erroresCampos.password2) setErroresCampos({...erroresCampos, password2: false});
+            }} 
           />
         </div>
 

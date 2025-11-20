@@ -13,10 +13,12 @@ import FisioDashboardPage from './pages/FisioDashboardPage'; // <-- 2. Importa l
 import AsignarRutinaPage from './pages/AsignarRutinaPage'; // <-- 1. Importa la nueva página
 import FisioBibliotecaPage from './pages/FisioBibliotecaPage'; // <-- 1. Importa
 import EjercicioEntrenamientoPage from './pages/EjercicioEntrenamientoPage'; // <-- ¿Está esta línea?
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
     <div className="App">
+      <Toaster position="top-center" reverseOrder={false} />
       <Navbar />
       <main style={{ minHeight: '80vh' }}>
         <Routes>

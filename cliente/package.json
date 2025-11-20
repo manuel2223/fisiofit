@@ -19,7 +19,9 @@
     "react-big-calendar": "^1.19.4",
     "react-calendar": "^6.0.0",
     "react-dom": "^19.1.1",
-    "react-router-dom": "^7.9.5"
+    "react-hot-toast": "^2.6.0",
+    "react-router-dom": "^7.9.5",
+    "recharts": "^3.4.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

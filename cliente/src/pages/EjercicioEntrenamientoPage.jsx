@@ -65,7 +65,7 @@ function EjercicioEntrenamientoPage() {
     };
   }, [ejercicioId]);
 
-  // 2. Bucle de Detección (Reutilizable)
+  // 2. Bucle de Detección
   const poseLoop = async () => {
     if (detectorRef.current && videoRef.current && canvasRef.current) {
       // Comprueba si el video está listo para dar datos

@@ -3,115 +3,149 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api';
-import './MiCuentaPage.css'; // Mantenemos el mismo CSS (y añadiremos más)
+import toast from 'react-hot-toast';
+import './MiCuentaPage.css';
 
 function MiCuentaPage() {
-
-  
   const { logout } = useAuth();
   const navigate = useNavigate();
 
-  // --- Estados para el Formulario de Edición ---
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
   
-  // --- Estados para los Datos ---
   const [citas, setCitas] = useState([]);
   const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState('');
-  const [exito, setExito] = useState(''); // Mensaje de éxito
+  
+  // 1. NUEVO: Estado para errores visuales
+  const [erroresCampos, setErroresCampos] = useState({});
 
-  // 1. Al cargar, busca AMBOS datos (usuario y citas)
   useEffect(() => {
     const cargarDatos = async () => {
       try {
         const [resUsuario, resCitas] = await Promise.all([
-          api.get('/auth/me'), // Datos del usuario
-          api.get('/citas/mis-citas') // Lista de citas
+          api.get('/auth/me'),
+          api.get('/citas/mis-citas')
         ]);
 
-        // Rellena el formulario
         setNombre(resUsuario.data.nombre);
         setEmail(resUsuario.data.email);
-        
-        // Carga la lista de citas
         setCitas(resCitas.data);
 
       } catch (err) {
-        console.error('Error al cargar datos de la cuenta', err);
-        setError('No se pudieron cargar los datos.');
+        console.error(err);
+        toast.error('Error al cargar los datos de tu cuenta');
       }
       setCargando(false);
     };
     cargarDatos();
-  }, []); // [] = ejecutar solo una vez
+  }, []);
 
-  // 2. Función para manejar la actualización de datos
   const handleUpdate = async (e) => {
     e.preventDefault();
-    setError('');
-    setExito('');
+    setErroresCampos({}); // Reinicia errores visuales
 
-    if (password && password !== password2) {
-      setError('Las contraseñas no coinciden.');
+    // --- 2. VALIDACIÓN VISUAL MANUAL ---
+    const nuevosErrores = {};
+    let hayError = false;
+
+    // Validar campos obligatorios
+    if (!nombre.trim()) {
+      nuevosErrores.nombre = true;
+      hayError = true;
+    }
+    if (!email.trim()) {
+      nuevosErrores.email = true;
+      hayError = true;
+    }
+
+    // Validar contraseñas (solo si escribe algo)
+    if (password) {
+      if (password !== password2) {
+        nuevosErrores.password = true;
+        nuevosErrores.password2 = true;
+        toast.error('Las contraseñas no coinciden.'); // Mensaje específico
+        hayError = true;
+      } else if (password.length < 6) {
+        nuevosErrores.password = true;
+        toast.error('La contraseña debe tener al menos 6 caracteres.'); // Mensaje específico
+        hayError = true;
+      }
+    }
+
+    // Si hay cualquier error, paramos aquí
+    if (hayError) {
+      setErroresCampos(nuevosErrores);
+      // Solo mostramos el genérico si no hemos mostrado uno específico de password
+      if (!nuevosErrores.password) {
+        toast.error('Por favor, revisa los campos marcados en rojo.');
+      }
       return;
     }
-    if (password && password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres.');
-      return;
-    }
+    // -----------------------------------
+
+    const toastId = toast.loading('Actualizando perfil...');
 
     try {
       const datosActualizados = { nombre, email };
       if (password) {
-        datosActualizados.password = password; // Solo envía la pass si se ha escrito
+        datosActualizados.password = password;
       }
 
-      const respuesta = await api.put('/auth/me', datosActualizados);
+      await api.put('/auth/me', datosActualizados);
       
-      setExito(respuesta.data.msg);
-      setPassword(''); // Limpia los campos de contraseña
+      toast.success('Perfil actualizado correctamente', { id: toastId });
+      setPassword('');
       setPassword2('');
       
     } catch (err) {
-      setError(err.response?.data?.msg || 'Error al actualizar los datos.');
+      const msg = err.response?.data?.msg || 'Error al actualizar.';
+      toast.error(msg, { id: toastId });
     }
   };
 
-  // 3. Función para manejar el logout
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  // 4. NUEVA FUNCIÓN: Manejar la cancelación de cita
-  const handleCancelarCita = async (citaId) => {
-    // Pedir confirmación
-    if (!window.confirm('¿Estás seguro de que quieres cancelar esta cita?')) {
-      return;
-    }
-
-    setError('');
-    setExito('');
-
+  const confirmarCancelacion = async (citaId) => {
+    const toastId = toast.loading('Cancelando cita...');
     try {
-      // Llama a la nueva ruta DELETE
       await api.delete(`/citas/${citaId}`);
-      
-      // ¡ÉXITO! Actualiza la UI al instante (mejor que recargar la página)
-      // Filtra la cita cancelada fuera del estado 'citas'
-      setCitas(citasActuales => 
-        citasActuales.filter(cita => cita.id !== citaId)
-      );
-      
-      setExito('Cita cancelada correctamente.'); // Muestra feedback
-
+      setCitas(citasActuales => citasActuales.filter(cita => cita.id !== citaId));
+      toast.success('Cita cancelada correctamente', { id: toastId });
     } catch (err) {
-      console.error('Error al cancelar cita:', err);
-      setError(err.response?.data?.msg || 'No se pudo cancelar la cita.');
+      console.error(err);
+      const msg = err.response?.data?.msg || 'No se pudo cancelar la cita.';
+      toast.error(msg, { id: toastId });
     }
+  };
+
+  const handleCancelarCita = (citaId) => {
+    toast((t) => (
+      <div className="toast-confirmacion">
+        <p>¿Seguro que quieres cancelar esta cita?</p>
+        <div className="toast-botones">
+          <button 
+            onClick={() => {
+              toast.dismiss(t.id);
+              confirmarCancelacion(citaId);
+            }}
+            className="btn-toast-confirmar"
+          >
+            Sí, cancelar
+          </button>
+          <button 
+            onClick={() => toast.dismiss(t.id)}
+            className="btn-toast-cancelar"
+          >
+            No
+          </button>
+        </div>
+      </div>
+    ), { duration: 5000, style: { border: '1px solid #E53E3E', padding: '16px' } });
   };
 
   if (cargando) {
@@ -125,27 +159,62 @@ function MiCuentaPage() {
         <h2>Editar Mis Datos</h2>
         
         <form onSubmit={handleUpdate}>
-          {error && <p className="error-mensaje">{error}</p>}
-          {exito && <p className="exito-mensaje">{exito}</p>}
-
           <div className="form-grupo">
             <label htmlFor="nombre">Nombre</label>
-            <input type="text" id="nombre" value={nombre} onChange={e => setNombre(e.target.value)} required />
+            <input 
+              type="text" 
+              id="nombre" 
+              value={nombre} 
+              // 3. CLASE CONDICIONAL Y LIMPIEZA DE ERROR
+              className={erroresCampos.nombre ? 'input-error' : ''}
+              onChange={e => {
+                setNombre(e.target.value);
+                if(erroresCampos.nombre) setErroresCampos({...erroresCampos, nombre: false});
+              }} 
+              // Quitamos required para que salte nuestra validación visual
+            />
           </div>
           <div className="form-grupo">
             <label htmlFor="email">Email</label>
-            <input type="email" id="email" value={email} onChange={e => setEmail(e.target.value)} required />
+            <input 
+              type="email" 
+              id="email" 
+              value={email} 
+              className={erroresCampos.email ? 'input-error' : ''}
+              onChange={e => {
+                setEmail(e.target.value);
+                if(erroresCampos.email) setErroresCampos({...erroresCampos, email: false});
+              }} 
+            />
           </div>
 
           <hr />
           <p>Cambiar contraseña (dejar en blanco para no cambiar)</p>
           <div className="form-grupo">
             <label htmlFor="password">Nueva Contraseña</label>
-            <input type="password" id="password" value={password} onChange={e => setPassword(e.target.value)} />
+            <input 
+              type="password" 
+              id="password" 
+              value={password} 
+              className={erroresCampos.password ? 'input-error' : ''}
+              onChange={e => {
+                setPassword(e.target.value);
+                if(erroresCampos.password) setErroresCampos({...erroresCampos, password: false, password2: false});
+              }} 
+            />
           </div>
           <div className="form-grupo">
             <label htmlFor="password2">Confirmar Nueva Contraseña</label>
-            <input type="password" id="password2" value={password2} onChange={e => setPassword2(e.target.value)} />
+            <input 
+              type="password" 
+              id="password2" 
+              value={password2} 
+              className={erroresCampos.password2 ? 'input-error' : ''}
+              onChange={e => {
+                setPassword2(e.target.value);
+                if(erroresCampos.password2) setErroresCampos({...erroresCampos, password2: false});
+              }} 
+            />
           </div>
           
           <button type="submit" className="boton-primario" style={{width: '100%'}}>Guardar Cambios</button>
@@ -156,17 +225,16 @@ function MiCuentaPage() {
         </button>
       </div>
 
-      {/* --- COLUMNA 2: MIS CITAS --- */}
+      {/* --- COLUMNA 2: MIS CITAS (Sin cambios) --- */}
       <div className="mis-citas-tarjeta tarjeta">
         <h2>Mis Citas</h2>
-        {error && <p className="error-mensaje">{error}</p>}
-        {exito && <p className="exito-mensaje">{exito}</p>}
-
-        {/* --- CÓDIGO CORREGIDO --- */}
-        {cargando ? (
-          <p>Cargando citas...</p>
-        ) : citas.length === 0 ? (
-          <p>Aún no tienes ninguna cita reservada.</p>
+        {citas.length === 0 ? (
+          <div style={{textAlign: 'center', padding: '2rem', opacity: 0.7}}>
+            <p>No tienes citas pendientes.</p>
+            <button className="boton-secundario" onClick={() => navigate('/reservar')} style={{marginTop: '1rem'}}>
+              Reservar una ahora
+            </button>
+          </div>
         ) : (
           <ul className="lista-citas">
             {citas.map(cita => (
@@ -186,14 +254,13 @@ function MiCuentaPage() {
                 </span>
                 <span className={`cita-estado ${cita.estado}`}>{cita.estado}</span>
 
-                {/* --- ¡EL BOTÓN VA AQUÍ DENTRO! --- */}
                 <button 
                   onClick={() => handleCancelarCita(cita.id)} 
                   className="boton-cancelar-cita"
                 >
                   Cancelar Cita
                 </button>
-              </li> // <-- El <li> se cierra DESPUÉS del botón
+              </li>
             ))}
           </ul>
         )}

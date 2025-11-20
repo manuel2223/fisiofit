@@ -158,3 +158,15 @@
   background-color: #E53E3E;
   color: white;
 }
+
+
+/* Clase para inputs con error */
+.input-error {
+  border: 2px solid #E53E3E !important;
+  background-color: #FFF5F5;
+}
+
+.input-error:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.2);
+}

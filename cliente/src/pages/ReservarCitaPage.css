@@ -104,3 +104,34 @@
   color: var(--color-blanco);
   transform: scale(1.05);
 }
+
+.form-reserva-extra {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.fecha-texto {
+  font-weight: bold;
+  color: var(--color-principal);
+  margin-bottom: 1rem;
+}
+
+/* Reutilizamos estilos de formulario */
+.form-grupo {
+  margin-bottom: 1rem;
+}
+.form-grupo label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.form-grupo select,
+.form-grupo textarea {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 6px;
+  font-family: inherit;
+}

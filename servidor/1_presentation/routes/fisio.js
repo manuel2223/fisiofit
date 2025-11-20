@@ -8,6 +8,7 @@ const fisioMiddleware = require('../middleware/fisioMiddleware');
 const AsignarRutinaUseCase = require('../../2_application/use_cases/AsignarRutinaUseCase');
 const { Usuario, Rutina, Ejercicio, Cita, EjercicioBiblioteca, Categoria } = require('../../3_domain/models');
 const sequelize = require('../../4_infrastructure/database/db');
+const { Op } = require('sequelize');
 
 // --- 2. RUTAS DE PACIENTES (GET) ---
 router.get('/pacientes', [authMiddleware, fisioMiddleware], async (req, res) => {
@@ -92,14 +93,15 @@ router.get('/biblioteca', [authMiddleware, fisioMiddleware], async (req, res) =>
 
 // POST /api/fisio/biblioteca (Arregla el CATCH)
 router.post('/biblioteca', [authMiddleware, fisioMiddleware], async (req, res) => {
-  let { nombre, descripcion, videoUrl, categoriaId } = req.body;
+  let { nombre, descripcion, videoUrl, categoriaId, reglasPostura } = req.body;
   try {
     const nuevoEjercicio = await EjercicioBiblioteca.create({
       nombre,
       descripcion,
       videoUrl: videoUrl === '' ? null : videoUrl,
       categoriaId, // Usa categoriaId
-      fisioterapeutaId: req.usuario.id
+      fisioterapeutaId: req.usuario.id,
+      reglasPostura: reglasPostura
     });
     res.status(201).json(nuevoEjercicio);
   } catch (error) {
@@ -114,9 +116,12 @@ router.post('/biblioteca', [authMiddleware, fisioMiddleware], async (req, res) =
   }
 });
 
-// PUT /api/fisio/biblioteca/:id (Arregla el CATCH)
+
+// PUT /api/fisio/biblioteca/:id
 router.put('/biblioteca/:id', [authMiddleware, fisioMiddleware], async (req, res) => {
-  const { nombre, descripcion, videoUrl, categoriaId } = req.body;
+  // 1. AÑADE 'reglasPostura' AQUÍ
+  const { nombre, descripcion, videoUrl, categoriaId, reglasPostura } = req.body;
+  
   try {
     const ejercicio = await EjercicioBiblioteca.findOne({
       where: { id: req.params.id, fisioterapeutaId: req.usuario.id }
@@ -126,12 +131,14 @@ router.put('/biblioteca/:id', [authMiddleware, fisioMiddleware], async (req, res
     ejercicio.nombre = nombre;
     ejercicio.descripcion = descripcion;
     ejercicio.videoUrl = videoUrl === '' ? null : videoUrl;
-    ejercicio.categoriaId = categoriaId; // Usa categoriaId
+    ejercicio.categoriaId = categoriaId;
+    
+    // 2. Y AÑÁDELO AQUÍ PARA ACTUALIZARLO
+    ejercicio.reglasPostura = reglasPostura;
 
     await ejercicio.save();
     res.json(ejercicio);
   } catch (error) {
-    // --- SOLUCIÓN AL REFERENCEERROR ---
     console.error('--- ERROR DETECTADO AL ACTUALIZAR EJERCICIO ---');
     console.error(error);
     if (error.name === 'SequelizeValidationError') {
@@ -194,6 +201,83 @@ router.delete('/categorias/:id', [authMiddleware, fisioMiddleware], async (req, 
   } catch (error) {
     console.error('Error al borrar categoría:', error);
     res.status(500).json({ msg: 'Error al eliminar. ¿Está en uso?' });
+  }
+});
+
+
+// --- RUTA DE ESTADÍSTICAS (DASHBOARD) ---
+// GET /api/fisio/stats
+router.get('/stats', [authMiddleware, fisioMiddleware], async (req, res) => {
+  try {
+    // ... (1. Citas Hoy y 2. Total Pacientes se quedan igual) ...
+    const hoy = new Date();
+    const inicioDia = new Date(hoy.setHours(0, 0, 0, 0));
+    const finDia = new Date(hoy.setHours(23, 59, 59, 999));
+
+    const citasHoy = await Cita.count({
+      where: {
+        fechaHoraInicio: { [Op.between]: [inicioDia, finDia] },
+        estado: 'confirmada'
+      }
+    });
+
+    const totalPacientes = await Usuario.count({
+      where: { rol: 'paciente' }
+    });
+
+    // ... (3. Gráfico Semanal se queda igual) ...
+    const curr = new Date(); 
+    const primerDiaSemana = new Date(curr.setDate(curr.getDate() - curr.getDay() + 1));
+    primerDiaSemana.setHours(0,0,0,0);
+    const ultimoDiaSemana = new Date(curr.setDate(curr.getDate() - curr.getDay() + 7));
+    ultimoDiaSemana.setHours(23,59,59,999);
+
+    const citasSemana = await Cita.findAll({
+      where: {
+        fechaHoraInicio: { [Op.between]: [primerDiaSemana, ultimoDiaSemana] }
+      },
+      attributes: ['fechaHoraInicio']
+    });
+
+    const diasGrafico = [
+      { name: 'Lun', citas: 0 }, { name: 'Mar', citas: 0 }, { name: 'Mié', citas: 0 },
+      { name: 'Jue', citas: 0 }, { name: 'Vie', citas: 0 }, { name: 'Sáb', citas: 0 }, { name: 'Dom', citas: 0 }
+    ];
+
+    citasSemana.forEach(cita => {
+      const fecha = new Date(cita.fechaHoraInicio);
+      let diaIndex = fecha.getDay() - 1; 
+      if (diaIndex === -1) diaIndex = 6; 
+      if (diasGrafico[diaIndex]) diasGrafico[diaIndex].citas += 1;
+    });
+
+
+    // --- 3b. GRÁFICO DONUT: CITAS POR TIPO (NUEVO) ---
+    const citasPorTipoRaw = await Cita.findAll({
+      attributes: [
+        'tipo',
+        [sequelize.fn('COUNT', sequelize.col('id')), 'total']
+      ],
+      group: ['tipo']
+    });
+
+    // Formateamos para Recharts: [{ name: 'Masaje', value: 10 }]
+    const graficoTipos = citasPorTipoRaw.map(item => ({
+      name: item.tipo,
+      value: parseInt(item.getDataValue('total'))
+    }));
+
+
+    res.json({
+      citasHoy,
+      totalPacientes,
+      graficoSemanal: diasGrafico,
+      graficoTipos // <-- Enviamos el nuevo gráfico
+    });
+
+  } catch (error) {
+    console.error('Error en stats:', error);
+    res.status(500).json({ msg: 'Error al calcular estadísticas' });
   }
 });
 

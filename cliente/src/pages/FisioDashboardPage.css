@@ -103,3 +103,112 @@
   padding: 2rem;
   margin-bottom: 2rem; /* Añadimos esto por si no usamos el layout */
 }
+
+
+/* El fondo oscuro semitransparente */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Negro al 50% */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Asegura que esté por encima de todo */
+  backdrop-filter: blur(3px); /* Efecto borroso de fondo (opcional) */
+}
+
+/* La caja blanca del contenido */
+.modal-contenido {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  animation: aparecer 0.3s ease-out;
+}
+
+@keyframes aparecer {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Cabecera del modal */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-borde);
+  padding-bottom: 0.5rem;
+}
+.modal-header h3 {
+  margin: 0;
+  color: var(--color-principal);
+}
+.modal-cerrar {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #666;
+  line-height: 1;
+}
+.modal-cerrar:hover {
+  color: #000;
+}
+
+/* Cuerpo del modal */
+.modal-body p {
+  margin-bottom: 0.8rem;
+  font-size: 1.05rem;
+}
+.tag-tipo {
+  background-color: var(--color-principal);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+.caja-motivo {
+  background-color: var(--color-fondo);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-borde);
+  margin-top: 0.5rem;
+  font-style: italic;
+  color: #555;
+}
+
+/* Pie del modal */
+.modal-footer {
+  margin-top: 2rem;
+  text-align: right;
+}
+
+.modal-footer .boton-secundario {
+  background-color: transparent;
+  color: #555; /* Gris oscuro para el texto */
+  border: 1px solid #ccc; /* Borde gris suave */
+  padding: 10px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-footer .boton-secundario:hover {
+  background-color: #f3f4f6; /* Un gris muy clarito al pasar el ratón */
+  border-color: #999; /* El borde se oscurece un poco */
+  color: #333; /* El texto se oscurece */
+
+}
+
+.modal-footer .boton-secundario:active {
+  transform: translateY(0); /* Vuelve a bajar al hacer clic */
+  background-color: #e5e7eb;
+}

@@ -1,60 +1,97 @@
+// En cliente/src/pages/LoginPage.jsx
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Importa useNavigate
-import api from '../api'; // <-- USAMOS NUESTRO ARCHIVO
-import { useAuth } from '../context/AuthContext'; // 1. Importa el hook
-import './LoginPage.css'; // Crearemos este CSS ahora
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import api from '../api';
+import toast from 'react-hot-toast';
+import './LoginPage.css';
 
 function LoginPage() {
-  // 1. Estados para guardar el email y la contraseña
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(''); // Estado para mensajes de error
-
-  const navigate = useNavigate(); // Hook para redirigir
-  const { login } = useAuth(); // 2. Trae la función 'login' del contexto
+  const [erroresCampos, setErroresCampos] = useState({}); 
+  
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setErroresCampos({}); 
+
+    // --- VALIDACIÓN VISUAL MEJORADA ---
+    const nuevosErrores = {};
+    let hayError = false;
+    let mensajeEspecificoMostrado = false; // Bandera para controlar los toasts
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // 1. Validar Email
+    if (!email.trim()) {
+      nuevosErrores.email = true;
+      hayError = true;
+    } else if (!emailRegex.test(email)) {
+      nuevosErrores.email = true;
+      hayError = true;
+      
+      // Error específico
+      toast.error('El formato del email no es válido.');
+      mensajeEspecificoMostrado = true; // Marcamos que ya hemos avisado
+    }
+
+    // 2. Validar Password
+    if (!password.trim()) {
+      nuevosErrores.password = true;
+      hayError = true;
+    }
+
+    // Decisión final de errores
+    if (hayError) {
+      setErroresCampos(nuevosErrores);
+      
+      // SOLO mostramos el mensaje genérico si NO hemos mostrado ya uno específico
+      if (!mensajeEspecificoMostrado) {
+         toast.error('Por favor, rellena los campos correctamente.');
+      }
+      return;
+    }
+    // -----------------------------------
+
+    const toastId = toast.loading('Iniciando sesión...');
 
     try {
-      // 1. Preparamos los datos para enviar
       const loginData = { email, password };
-
-      // 2. Llamamos a la API de LOGIN
       const respuesta = await api.post('/auth/login', loginData);
 
-      login(respuesta.data.token, respuesta.data.rol); // 3. Llama a 'login' con token y rol
-      navigate('/'); // Redirigimos a la página de inicio
+      login(respuesta.data.token, respuesta.data.rol);
+      
+      toast.success(`¡Bienvenido de nuevo!`, { id: toastId });
+      navigate('/'); 
 
     } catch (errorApi) {
-      // 6. Si la API da error (email no existe, pass incorrecta)
       console.error('Error al iniciar sesión:', errorApi);
-      if (errorApi.response && errorApi.response.data && errorApi.response.data.msg) {
-        // Mostramos el error del backend ("Email o contraseña incorrectos")
-        setError(errorApi.response.data.msg);
-      } else {
-        setError('Ocurrió un error al iniciar sesión.');
-      }
+      const msg = errorApi.response?.data?.msg || 'Error al iniciar sesión.';
+      
+      setErroresCampos({ email: true, password: true });
+      toast.error(msg, { id: toastId });
     }
   };
 
   return (
     <div className="login-container">
-      <form className="login-form tarjeta" onSubmit={handleSubmit}>
+      <form className="login-form tarjeta" onSubmit={handleSubmit} noValidate>
         <h2>Iniciar Sesión</h2>
         
-        {/* Muestra el mensaje de error si existe */}
-        {error && <p className="error-mensaje">{error}</p>}
-
         <div className="form-grupo">
           <label htmlFor="email">Email</label>
           <input 
             type="email" 
             id="email" 
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required 
+            className={erroresCampos.email ? 'input-error' : ''}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if(erroresCampos.email) setErroresCampos({...erroresCampos, email: false});
+            }}
           />
         </div>
 
@@ -64,8 +101,11 @@ function LoginPage() {
             type="password" 
             id="password" 
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required 
+            className={erroresCampos.password ? 'input-error' : ''}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if(erroresCampos.password) setErroresCampos({...erroresCampos, password: false});
+            }}
           />
         </div>
 

@@ -43,31 +43,29 @@ router.get('/disponibilidad/:fecha', [authMiddleware], async (req, res) => {
   }
 });
 
-
-// --- RUTA PARA QUE UN PACIENTE CREE UNA CITA ---
 // POST /api/citas/reservar
 router.post('/reservar', [authMiddleware], async (req, res) => {
   try {
-    const { fechaHoraInicio, fechaHoraFin } = req.body;
-    const pacienteId = req.usuario.id; // Obtenido del token
+    // 1. Recibimos los nuevos campos del body
+    const { fechaHoraInicio, fechaHoraFin, motivo, tipo } = req.body;
+    const pacienteId = req.usuario.id;
+    
+    // ID del fisio (hardcodeado para el TFG, o podrías enviarlo desde el front)
+    const fisioterapeutaId = 1; 
 
-    // --- Lógica del Fisioterapeuta ---
-    // Para este TFG, asumimos que solo hay un fisio (ej: con id=1)
-    // En una app real, aquí habría lógica para asignar uno.
-    const fisioterapeutaId = 1; // ¡Asegúrate de que existe un fisio con id=1!
-
-    if (!fechaHoraInicio || !fechaHoraFin) {
-      return res.status(400).json({ msg: 'Faltan fechas.' });
+    if (!fechaHoraInicio || !fechaHoraFin || !tipo) {
+      return res.status(400).json({ msg: 'Faltan datos obligatorios (fecha o tipo).' });
     }
-
-    // (Opcional) Comprobar si la cita ya está ocupada, por si acaso
 
     const nuevaCita = await Cita.create({
       pacienteId,
       fisioterapeutaId,
       fechaHoraInicio: new Date(fechaHoraInicio),
       fechaHoraFin: new Date(fechaHoraFin),
-      estado: 'confirmada'
+      estado: 'confirmada',
+      // 2. Guardamos los nuevos campos
+      motivo: motivo,
+      tipo: tipo
     });
 
     res.status(201).json({ msg: 'Cita reservada exitosamente.', cita: nuevaCita });

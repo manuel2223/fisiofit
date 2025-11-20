@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
-import './AsignarRutinaPage.css'; // Vamos a reescribir este CSS
+import toast from 'react-hot-toast'; // 1. Importamos Toast
+import './AsignarRutinaPage.css';
 
 function AsignarRutinaPage() {
   const { pacienteId } = useParams();
@@ -13,15 +14,17 @@ function AsignarRutinaPage() {
   const [biblioteca, setBiblioteca] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState('');
+  // (Borramos estado 'error' local, usaremos Toast)
 
   // --- Estados del Constructor ---
   const [nombreRutina, setNombreRutina] = useState('');
-  // Este es el array de la Columna Derecha (la rutina que estamos construyendo)
   const [ejerciciosRutina, setEjerciciosRutina] = useState([]); 
   
-  // --- Estados de los Filtros (Columna Izquierda) ---
-  const [selectedCategory, setSelectedCategory] = useState('all'); // 'all' o un ID de categoría
+  // --- Estado para validación visual ---
+  const [erroresCampos, setErroresCampos] = useState({}); 
+
+  // --- Estados de los Filtros ---
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   // 1. Carga todos los datos al iniciar
@@ -38,54 +41,50 @@ function AsignarRutinaPage() {
         setCategorias(resCategorias.data);
       } catch (err) {
         console.error(err);
-        setError('No se pudieron cargar los datos.');
+        toast.error('Error al cargar los datos iniciales.');
       }
       setCargando(false);
     };
     cargarDatos();
   }, [pacienteId]);
-  
-  // 2. Lógica de Filtro (Columna Izquierda)
+
+  // 2. Lógica de Filtro
   const bibliotecaFiltrada = useMemo(() => {
+    if (!Array.isArray(biblioteca)) return []; 
+    
     return biblioteca
-      // Filtro por Categoría
       .filter(ej => {
         if (selectedCategory === 'all') return true;
         return ej.categoriaId === selectedCategory;
       })
-      // Filtro por Búsqueda (nombre o descripción)
       .filter(ej => 
         ej.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        ej.descripcion?.toLowerCase().includes(searchQuery.toLowerCase())
+        (ej.descripcion && ej.descripcion.toLowerCase().includes(searchQuery.toLowerCase()))
       );
   }, [biblioteca, selectedCategory, searchQuery]);
 
-  // 3. Lógica del Constructor (Añadir/Quitar/Modificar)
+  // 3. Lógica del Constructor
 
-  // Añade un ejercicio de la biblioteca (Col Izq) a la rutina (Col Der)
   const addEjercicioToRutina = (ejercicioDeBiblioteca) => {
     setEjerciciosRutina([
       ...ejerciciosRutina,
       {
-        // Copia los datos de la biblioteca
         nombreEjercicio: ejercicioDeBiblioteca.nombre,
         videoUrl: ejercicioDeBiblioteca.videoUrl || '',
-        // Y añade los campos de la rutina
-        series: 3, // Valor por defecto
-        repeticiones: 10, // Valor por defecto
-        reglasPostura: ejercicioDeBiblioteca.reglasPostura || null
+        reglasPostura: ejercicioDeBiblioteca.reglasPostura || null,
+        series: 3, 
+        repeticiones: 10
       }
     ]);
+    toast.success('Ejercicio añadido', { duration: 1000 }); // Feedback rápido
   };
 
-  // Quita un ejercicio de la rutina (Col Der)
   const removeEjercicioFromRutina = (index) => {
     const nuevosEjercicios = [...ejerciciosRutina];
     nuevosEjercicios.splice(index, 1);
     setEjerciciosRutina(nuevosEjercicios);
   };
 
-  // Actualiza las series/reps de un ejercicio en la rutina (Col Der)
   const handleRutinaEjercicioChange = (index, e) => {
     const { name, value } = e.target;
     const nuevosEjercicios = [...ejerciciosRutina];
@@ -93,37 +92,58 @@ function AsignarRutinaPage() {
     setEjerciciosRutina(nuevosEjercicios);
   };
 
-  // 4. Envío del Formulario (sin cambios en la lógica)
+  // 4. Envío del Formulario (MEJORADO)
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    if (!nombreRutina || ejerciciosRutina.length === 0) {
-      setError('La rutina debe tener un nombre y al menos un ejercicio.');
+    setErroresCampos({}); // Reiniciar errores visuales
+    
+    // --- VALIDACIÓN ---
+    let hayError = false;
+    const nuevosErrores = {};
+
+    if (!nombreRutina.trim()) {
+      nuevosErrores.nombreRutina = true;
+      hayError = true;
+    }
+
+    if (hayError) {
+      setErroresCampos(nuevosErrores);
+      toast.error('Por favor, ponle un nombre a la rutina.');
       return;
     }
+
+    if (ejerciciosRutina.length === 0) {
+      toast.error('La rutina debe tener al menos un ejercicio.');
+      return;
+    }
+    // ------------------
+
+    const toastId = toast.loading('Asignando rutina...');
+
     try {
       await api.post('/fisio/rutinas', {
         pacienteId: paciente.id,
         nombreRutina,
-        ejercicios: ejerciciosRutina // Envía el array de la Columna Derecha
+        ejercicios: ejerciciosRutina
       });
-      alert('¡Rutina asignada exitosamente!');
+      
+      toast.success('¡Rutina asignada exitosamente!', { id: toastId });
       navigate('/fisio/dashboard');
+
     } catch (err) {
       console.error(err);
-      setError('Error al asignar la rutina.');
+      const msg = err.response?.data?.msg || 'Error al asignar la rutina.';
+      toast.error(msg, { id: toastId });
     }
   };
 
-
-  if (cargando) return <div>Cargando...</div>;
-  if (error && !paciente) return <div style={{color: 'red'}}>{error}</div>;
+  if (cargando) return <div className="zona-carga"><h3>Cargando...</h3></div>;
+  if (!paciente) return <div className="zona-carga"><h3>No se encontró al paciente.</h3></div>;
 
   return (
     <div className="constructor-container">
       <form onSubmit={handleSubmit} className="tarjeta">
         <h2>Asignar Rutina a: {paciente?.nombre}</h2>
-        {error && <p className="error-mensaje">{error}</p>}
         
         <div className="form-grupo">
           <label htmlFor="nombreRutina">Nombre de la Rutina</label>
@@ -131,14 +151,20 @@ function AsignarRutinaPage() {
             type="text"
             id="nombreRutina"
             value={nombreRutina}
-            onChange={(e) => setNombreRutina(e.target.value)}
-            required
+            // CLASE CONDICIONAL
+            className={erroresCampos.nombreRutina ? 'input-error' : ''}
+            onChange={(e) => {
+              setNombreRutina(e.target.value);
+              // Limpiar error al escribir
+              if(erroresCampos.nombreRutina) setErroresCampos({...erroresCampos, nombreRutina: false});
+            }}
+            placeholder="Ej: Rutina de Recuperación Semana 1"
           />
         </div>
 
         <hr />
 
-        {/* --- 5. EL CONSTRUCTOR DE DOS COLUMNAS --- */}
+        {/* --- EL CONSTRUCTOR DE DOS COLUMNAS --- */}
         <div className="constructor-layout">
           
           {/* --- Columna Izquierda (Biblioteca) --- */}
@@ -184,6 +210,9 @@ function AsignarRutinaPage() {
                   <button type="button" onClick={() => addEjercicioToRutina(ej)}>+</button>
                 </li>
               ))}
+              {bibliotecaFiltrada.length === 0 && (
+                <li style={{textAlign: 'center', color: '#888', fontStyle: 'italic'}}>No hay ejercicios</li>
+              )}
             </ul>
           </div>
 
@@ -221,7 +250,10 @@ function AsignarRutinaPage() {
                 </li>
               ))}
               {ejerciciosRutina.length === 0 && (
-                <p style={{textAlign: 'center', opacity: 0.7}}>Añade ejercicios desde la biblioteca</p>
+                <div style={{textAlign: 'center', opacity: 0.7, padding: '2rem'}}>
+                  <p>La rutina está vacía.</p>
+                  <p style={{fontSize: '0.9rem'}}>Añade ejercicios pulsando el <strong>+</strong> en la biblioteca.</p>
+                </div>
               )}
             </ul>
           </div>

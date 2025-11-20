@@ -150,3 +150,134 @@
   cursor: pointer;
   padding: 0 0.5rem;
 }
+
+
+.input-error {
+  border: 2px solid #E53E3E !important; /* Rojo fuerte */
+  background-color: #FFF5F5; /* Fondo rojizo muy suave */
+}
+
+/* Opcional: Animación de "temblor" para llamar la atención */
+.input-error:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.2);
+}
+
+/* Estilos del Toast de Confirmación */
+.toast-confirmacion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.toast-confirmacion p {
+  margin: 0;
+  font-weight: 500;
+  color: #333;
+}
+
+.toast-botones {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.btn-toast-confirmar {
+  background-color: #E53E3E;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-toast-cancelar {
+  background-color: #E5E7EB;
+  color: #333;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+
+.constructor-reglas-box {
+  background-color: #f9fafb;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px dashed var(--color-borde);
+}
+
+.lista-reglas-agregadas {
+  list-style: none;
+  padding: 0;
+  margin-top: 1rem;
+}
+
+.lista-reglas-agregadas li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 0.5rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.info-regla {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+}
+
+.info-regla span {
+  color: var(--color-principal);
+  font-weight: bold;
+}
+
+.info-regla small {
+  color: #666;
+  font-style: italic;
+}
+
+.boton-borrar-mini {
+  background: #FFE2E2;
+  color: #D8000C;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.boton-add-regla {
+  width: 100%;
+  background-color: white;
+  color: var(--color-principal); /* Tu verde turquesa */
+  border: 2px dashed var(--color-principal); /* Borde discontinuo */
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem; /* Espacio entre el icono + y el texto */
+}
+
+.boton-add-regla:hover {
+  background-color: #f0fdf4; /* Un verde muy muy suave de fondo */
+  border-style: solid; /* El borde se vuelve sólido al pasar el ratón */
+  transform: translateY(-2px); /* Pequeño efecto de elevación */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.boton-add-regla:active {
+  transform: translateY(0);
+}

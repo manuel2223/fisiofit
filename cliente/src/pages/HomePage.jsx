@@ -59,7 +59,7 @@ function HomePage() {
           </div>
           <div className="tarjeta">
             <h3>Rutinas Personalizadas</h3>
-            <p>Accede a los ejercicios que tu fisio ha preparado para ti.</p>
+            <p>Accede a los ejercicios que tu fisioterapeuta ha preparado para ti.</p>
           </div>
           <div className="tarjeta">
             <h3>Seguimiento Profesional</h3>

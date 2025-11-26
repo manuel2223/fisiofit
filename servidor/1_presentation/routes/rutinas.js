@@ -4,7 +4,7 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 
 // 1. SOLUCIÓN: Añade 'Usuario' a esta importación
-const { Rutina, Ejercicio, Usuario } = require('../../3_domain/models'); 
+const { Rutina, Ejercicio, Usuario, Resultado } = require('../../3_domain/models'); 
 
 // 2. APLICA EL GUARDIA:
 router.get('/', authMiddleware, async (req, res) => {
@@ -49,6 +49,32 @@ router.get('/ejercicio/:id', [authMiddleware], async (req, res) => {
   } catch (error) {
     console.error('Error al obtener ejercicio:', error);
     res.status(500).json({ msg: 'Error interno del servidor.' });
+  }
+});
+
+// --- RUTA PARA GUARDAR EL FEEDBACK DEL PACIENTE ---
+// POST /api/rutinas/feedback
+router.post('/feedback', [authMiddleware], async (req, res) => {
+  const { ejercicioId, dificultad, dolor, comentarios } = req.body;
+  const pacienteId = req.usuario.id;
+
+  try {
+    // (Opcional: Podríamos verificar que el ejercicio pertenece al paciente, 
+    // pero por ahora confiamos en el ID que manda el frontend)
+
+    const nuevoResultado = await Resultado.create({
+      ejercicioId,
+      pacienteId,
+      dificultad,
+      dolor,
+      comentarios
+    });
+
+    res.status(201).json({ msg: 'Feedback guardado correctamente.', resultado: nuevoResultado });
+
+  } catch (error) {
+    console.error('Error al guardar feedback:', error);
+    res.status(500).json({ msg: 'Error al guardar el progreso.' });
   }
 });
 

@@ -150,8 +150,17 @@ function ReservarCitaPage() {
                 const ahora = new Date();
                 const yaPaso = fechaSlot < ahora;
                 const estaOcupada = horariosOcupados.includes(hora);
-                const deshabilitado = estaOcupada || yaPaso;
+                const diaSemana = fechaSeleccionada.getDay();
+                const esFinDeSemana = diaSemana === 0 || diaSemana === 6; // 0=Dom, 6=Sab
+
+                // 3. Añadimos la condición al deshabilitado
+                const deshabilitado = estaOcupada || yaPaso || esFinDeSemana;
                 const esSeleccionada = hora === horaSeleccionada;
+
+                let mensajeTitulo = "";
+                if (esFinDeSemana) mensajeTitulo = "La clínica cierra los fines de semana";
+                else if (yaPaso) mensajeTitulo = "Esta hora ya ha pasado";
+                else if (estaOcupada) mensajeTitulo = "Hora ocupada";
 
                 return (
                   <button 
@@ -159,7 +168,7 @@ function ReservarCitaPage() {
                     className={`hora-boton ${esSeleccionada ? 'seleccionada' : ''}`}
                     disabled={deshabilitado}
                     onClick={() => setHoraSeleccionada(hora)}
-                    title={yaPaso ? "Esta hora ya ha pasado" : (estaOcupada ? "Hora ocupada" : "")}
+                    title={mensajeTitulo} 
                   >
                     {hora}
                   </button>

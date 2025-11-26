@@ -5,6 +5,7 @@ const Rutina = require('./Rutina');
 const Ejercicio = require('./Ejercicio');
 const EjercicioBiblioteca = require('./EjercicioBiblioteca'); 
 const Categoria = require('./Categoria');
+const Resultado = require('./Resultado'); 
 
 // 1. Relaciones de Cita
 // Un Usuario (Paciente) tiene muchas Citas
@@ -37,6 +38,14 @@ EjercicioBiblioteca.belongsTo(Usuario, { foreignKey: 'fisioterapeutaId' });
 Categoria.hasMany(EjercicioBiblioteca, { foreignKey: 'categoriaId' });
 EjercicioBiblioteca.belongsTo(Categoria, { as: 'categoria', foreignKey: 'categoriaId' });
 
+// Un Usuario (Paciente) tiene muchos Resultados
+Usuario.hasMany(Resultado, { foreignKey: 'pacienteId' });
+Resultado.belongsTo(Usuario, { foreignKey: 'pacienteId' });
+
+// Un Ejercicio (de la Rutina) puede tener muchos Resultados (si lo hace varios días)
+Ejercicio.hasMany(Resultado, { foreignKey: 'ejercicioId' });
+Resultado.belongsTo(Ejercicio, { foreignKey: 'ejercicioId' });
+
 // Exportamos todos los modelos para usarlos en la API
 module.exports = {
   Usuario,
@@ -44,5 +53,6 @@ module.exports = {
   Rutina,
   Ejercicio,
   EjercicioBiblioteca,
-  Categoria
+  Categoria,
+  Resultado 
 };

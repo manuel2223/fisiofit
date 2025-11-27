@@ -1,0 +1,82 @@
+/* En cliente/src/pages/PacienteDetallePage.css */
+
+.ficha-container {
+  width: 90%;
+  max-width: 1000px;
+  margin: 2rem auto;
+}
+
+/* Cabecera */
+.ficha-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+.ficha-header h2 {
+  margin: 0;
+  color: var(--color-principal);
+}
+.email-text {
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+/* Tabla de Resultados */
+.tabla-resultados-wrapper {
+  padding: 0; /* La tabla ocupa todo */
+  overflow-x: auto; /* Scroll si es muy ancha */
+}
+
+.tabla-resultados {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-resultados th {
+  background-color: #f9fafb;
+  text-align: left;
+  padding: 1rem;
+  border-bottom: 2px solid var(--color-borde);
+  color: #555;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.tabla-resultados td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-borde);
+  vertical-align: top;
+}
+
+.tabla-resultados tr:last-child td {
+  border-bottom: none;
+}
+
+.col-comentarios {
+  max-width: 300px;
+  font-style: italic;
+  color: #444;
+}
+
+/* Tags de colores */
+.tag-dificultad {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.tag-dificultad.muy-fácil { background-color: #D1FAE5; color: #065F46; }
+.tag-dificultad.fácil { background-color: #D1FAE5; color: #065F46; }
+.tag-dificultad.normal { background-color: #DBEAFE; color: #1E40AF; }
+.tag-dificultad.difícil { background-color: #FEF3C7; color: #92400E; }
+.tag-dificultad.imposible { background-color: #FEE2E2; color: #991B1B; }
+
+.tag-dolor.si {
+  color: #C53030;
+  font-weight: bold;
+}
+.tag-dolor.no {
+  color: #10B981;
+}

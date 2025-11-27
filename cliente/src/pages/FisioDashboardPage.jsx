@@ -128,8 +128,21 @@ function FisioDashboardPage() {
              <ul className="lista-pacientes">
               {pacientes.map(paciente => (
                 <li key={paciente.id}>
-                  <span className="nombre">{paciente.nombre}</span>
-                  <button onClick={() => handleAsignarClick(paciente.id)} className="boton-asignar">Asignar Rutina</button>
+                  <div style={{display:'flex', flexDirection:'column'}}>
+                    {/* ENLACE A LA FICHA */}
+                    <Link 
+                      to={`/fisio/paciente/${paciente.id}`} 
+                      className="nombre" 
+                      style={{textDecoration:'none', color:'inherit', cursor:'pointer'}}
+                    >
+                      {paciente.nombre}
+                    </Link>
+                    <span className="email">{paciente.email}</span>
+                  </div>
+                  
+                  <button onClick={() => handleAsignarClick(paciente.id)} className="boton-asignar">
+                    Asignar Rutina
+                  </button>
                 </li>
               ))}
             </ul>

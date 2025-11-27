@@ -6,7 +6,7 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const fisioMiddleware = require('../middleware/fisioMiddleware');
 const AsignarRutinaUseCase = require('../../2_application/use_cases/AsignarRutinaUseCase');
-const { Usuario, Rutina, Ejercicio, Cita, EjercicioBiblioteca, Categoria } = require('../../3_domain/models');
+const { Usuario, Rutina, Ejercicio, Cita, EjercicioBiblioteca, Categoria, Resultado } = require('../../3_domain/models');
 const sequelize = require('../../4_infrastructure/database/db');
 const { Op } = require('sequelize');
 
@@ -278,6 +278,30 @@ router.get('/stats', [authMiddleware, fisioMiddleware], async (req, res) => {
   } catch (error) {
     console.error('Error en stats:', error);
     res.status(500).json({ msg: 'Error al calcular estadísticas' });
+  }
+});
+
+
+// --- RUTA PARA OBTENER EL HISTORIAL DE RESULTADOS DE UN PACIENTE ---
+// GET /api/fisio/paciente/:id/resultados
+router.get('/paciente/:id/resultados', [authMiddleware, fisioMiddleware], async (req, res) => {
+  try {
+    const resultados = await Resultado.findAll({
+      where: { pacienteId: req.params.id },
+      include: [
+        { 
+          model: Ejercicio, 
+          attributes: ['nombreEjercicio'] // Para saber qué ejercicio hizo
+        }
+      ],
+      order: [['fecha', 'DESC']] // Los más recientes primero
+    });
+
+    res.json(resultados);
+
+  } catch (error) {
+    console.error('Error al obtener resultados:', error);
+    res.status(500).json({ msg: 'Error interno del servidor.' });
   }
 });
 

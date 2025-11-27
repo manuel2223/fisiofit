@@ -10,7 +10,7 @@ import * as poseDetection from '@tensorflow-models/pose-detection';
 import '@tensorflow/tfjs-backend-webgl';
 import '@mediapipe/pose';
 
-import { calculateAngle } from '../utils/poseUtils';
+import { calculateAngle, calculateIncline } from '../utils/poseUtils';
 import './EjercicioEntrenamientoPage.css';
 
 const POSE_LANDMARKS = poseDetection.util.getAdjacentPairs(poseDetection.SupportedModels.BlazePose);
@@ -85,26 +85,47 @@ function EjercicioEntrenamientoPage() {
       const ctx = canvasRef.current.getContext('2d');
       let feedbackVisual = { esCorrecto: true, mensajes: [] };
 
-      // Análisis de Reglas
       if (poses.length > 0 && ejercicio && ejercicio.reglasPostura) {
         const pose = poses[0];
         
         // Lado Dominante
         const leftPoints = ['left_shoulder', 'left_hip', 'left_knee', 'left_ankle'];
         const rightPoints = ['right_shoulder', 'right_hip', 'right_knee', 'right_ankle'];
-        let scoreLeft = 0;
-        let scoreRight = 0;
+        let scoreLeft = 0; let scoreRight = 0;
         pose.keypoints.forEach(kp => {
           if (leftPoints.includes(kp.name)) scoreLeft += kp.score;
           if (rightPoints.includes(kp.name)) scoreRight += kp.score;
         });
-        const ignoreLeft = (scoreRight - scoreLeft) > 0.5;
-        const ignoreRight = (scoreLeft - scoreRight) > 0.5;
+        const ignoreLeft = (scoreRight - scoreLeft) > 0.4;
+        const ignoreRight = (scoreLeft - scoreRight) > 0.4;
 
         ejercicio.reglasPostura.forEach(regla => {
           if (ignoreLeft && regla.articulacion.includes('izquierda')) return;
           if (ignoreRight && regla.articulacion.includes('derecha')) return;
 
+          // CASO ESPALDA
+          if (regla.articulacion.includes('espalda') || regla.articulacion.includes('inclinacion')) {
+             const p1 = pose.keypoints.find(k => k.name === regla.puntos[0]);
+             const p2 = pose.keypoints.find(k => k.name === regla.puntos[1]);
+             
+             if (p1 && p2 && p1.score > 0.5 && p2.score > 0.5) {
+                // No añadimos punto virtual al array de TF, lo manejamos en dibujo
+                const inclinacion = calculateIncline(p1, p2);
+                const [min, max] = regla.rangoCorrecto;
+                
+                p2.anguloCalculado = Math.round(inclinacion);
+                // Marcamos puntos activos para dibujar
+                regla.puntosActivos = [p1.name, p2.name, 'vertical']; 
+
+                if (inclinacion < min || inclinacion > max) {
+                  feedbackVisual.esCorrecto = false;
+                  feedbackVisual.mensajes.push(regla.mensajeError);
+                }
+             }
+             return;
+          }
+
+          // CASO NORMAL
           const p1 = pose.keypoints.find(k => k.name === regla.puntos[0]);
           const p2 = pose.keypoints.find(k => k.name === regla.puntos[1]);
           const p3 = pose.keypoints.find(k => k.name === regla.puntos[2]);
@@ -112,7 +133,9 @@ function EjercicioEntrenamientoPage() {
           if (p1 && p2 && p3 && p1.score > 0.5 && p2.score > 0.5 && p3.score > 0.5) {
             const anguloActual = calculateAngle(p1, p2, p3);
             const [min, max] = regla.rangoCorrecto;
+            
             p2.anguloCalculado = Math.round(anguloActual);
+            regla.puntosActivos = [p1.name, p2.name, p3.name];
 
             if (anguloActual < min || anguloActual > max) {
               feedbackVisual.esCorrecto = false;
@@ -134,28 +157,62 @@ function EjercicioEntrenamientoPage() {
     loopRef.current = requestAnimationFrame(poseLoop);
   };
 
-  // 3. DIBUJO (¡CORREGIDO!)
+  // --- FUNCIÓN AUXILIAR PARA DIBUJAR EL CONO ---
+  const drawArcGuide = (ctx, center, baseAngle, range, isClockwise) => {
+    const radius = 100;
+    const [minDeg, maxDeg] = range;
+
+    let angle1, angle2;
+    if (isClockwise) {
+      angle1 = baseAngle + (minDeg * Math.PI / 180);
+      angle2 = baseAngle + (maxDeg * Math.PI / 180);
+    } else {
+      angle1 = baseAngle - (minDeg * Math.PI / 180);
+      angle2 = baseAngle - (maxDeg * Math.PI / 180);
+    }
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(center.x, center.y);
+    ctx.arc(center.x, center.y, radius, angle1, angle2, !isClockwise);
+    ctx.fillStyle = "rgba(255, 215, 0, 0.2)"; // Amarillo semitransparente
+    ctx.fill();
+
+    ctx.strokeStyle = "gold";
+    ctx.lineWidth = 3;
+    ctx.setLineDash([5, 5]);
+
+    ctx.beginPath();
+    ctx.moveTo(center.x, center.y);
+    ctx.lineTo(center.x + Math.cos(angle1) * radius, center.y + Math.sin(angle1) * radius);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(center.x, center.y);
+    ctx.lineTo(center.x + Math.cos(angle2) * radius, center.y + Math.sin(angle2) * radius);
+    ctx.stroke();
+    ctx.restore();
+  };
+
+  // 3. DIBUJO
   const drawCanvas = (poses, ctx, feedbackVisual) => {
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
     if (poses.length > 0) {
       const pose = poses[0];
 
-      // --- MATEMÁTICAS DE ESCALADO ---
+      // --- ESCALADO ---
       const canvasWidth = canvasRef.current.width;
       const canvasHeight = canvasRef.current.height;
       const videoWidth = videoRef.current.videoWidth;
       const videoHeight = videoRef.current.videoHeight;
       
-      // Si no hay vídeo, no dibujamos para evitar división por cero
       if (!videoWidth || !videoHeight) return;
 
       const videoRatio = videoWidth / videoHeight;
       const canvasRatio = canvasWidth / canvasHeight;
       
-      let scale = 1;
-      let offsetX = 0;
-      let offsetY = 0;
+      let scale = 1, offsetX = 0, offsetY = 0;
 
       if (videoRatio > canvasRatio) { 
         scale = canvasWidth / videoWidth;
@@ -164,62 +221,111 @@ function EjercicioEntrenamientoPage() {
         scale = canvasHeight / videoHeight;
         offsetX = (canvasWidth - videoWidth * scale) / 2;
       }
-      // -------------------------------
+      
+      // Función para transformar coordenadas de TFJS al canvas
+      const toCanvasCoords = (kp) => ({
+        x: kp.x * scale + offsetX,
+        y: kp.y * scale + offsetY
+      });
 
-      const colorEsqueleto = feedbackVisual.esCorrecto ? '#00FF00' : '#FF0000';
-      const grosorLinea = feedbackVisual.esCorrecto ? 2 : 4;
+      // --- 1. DIBUJAR GUÍAS AR (El Cono Amarillo) ---
+      if (ejercicio && ejercicio.reglasPostura) {
+         ejercicio.reglasPostura.forEach(regla => {
+            if (regla.puntosActivos) {
+               // Recuperar coordenadas escaladas
+               const p1Name = regla.puntosActivos[0];
+               const p2Name = regla.puntosActivos[1];
+               const p3Name = regla.puntosActivos[2];
 
-      // Puntos
-      ctx.fillStyle = colorEsqueleto;
-      for (let keypoint of pose.keypoints) {
-        if (keypoint.score > 0.3) {
-          // ¡AQUÍ ESTABA EL ERROR! Usamos las matemáticas de escalado
-          // TensorFlow devuelve coordenadas relativas al elemento (0-640)
-          // Nosotros las "re-encajamos" en el área visible del vídeo
-          
-          const relativeX = keypoint.x / canvasWidth;
-          const relativeY = keypoint.y / canvasHeight;
-          
-          const finalX = (relativeX * videoWidth * scale) + offsetX;
-          const finalY = (relativeY * videoHeight * scale) + offsetY;
+               const kp1 = pose.keypoints.find(k => k.name === p1Name);
+               const kp2 = pose.keypoints.find(k => k.name === p2Name);
+               
+               // Si es la regla de espalda (vertical), no necesitamos p3
+               if (p3Name === 'vertical' && kp1 && kp2) {
+                  const center = toCanvasCoords(kp2);
+                  // Dibuja respecto a la vertical (-PI/2)
+                  drawArcGuide(ctx, center, -Math.PI / 2, regla.rangoCorrecto, true);
+               } 
+               // Regla normal (3 puntos)
+               else {
+                  const kp3 = pose.keypoints.find(k => k.name === p3Name);
+                  if (kp1 && kp2 && kp3) {
+                     const start = toCanvasCoords(kp1);
+                     const center = toCanvasCoords(kp2);
+                     const end = toCanvasCoords(kp3);
+                     
+                     // Calcular ángulo base y dirección
+                     const angleBase = Math.atan2(start.y - center.y, start.x - center.x);
+                     const det = (start.x - center.x) * (end.y - center.y) - (start.y - center.y) * (end.x - center.x);
+                     const isClockwise = det > 0;
 
-          ctx.beginPath();
-          ctx.arc(finalX, finalY, 5, 0, 2 * Math.PI);
-          ctx.fill();
-          
-          if (keypoint.anguloCalculado) {
-             ctx.font = "bold 16px Arial";
-             ctx.fillStyle = "yellow";
-             ctx.fillText(keypoint.anguloCalculado + "°", finalX + 10, finalY);
-             ctx.fillStyle = colorEsqueleto;
-          }
-        }
+                     drawArcGuide(ctx, center, angleBase, regla.rangoCorrecto, isClockwise);
+                  }
+               }
+            }
+         });
       }
 
-      // Líneas
-      ctx.strokeStyle = colorEsqueleto;
-      ctx.lineWidth = grosorLinea;
-      for (const [start, end] of POSE_LANDMARKS) {
-        const kp1 = pose.keypoints.find(k => k.name === start);
-        const kp2 = pose.keypoints.find(k => k.name === end);
+      // --- 2. DIBUJAR ESQUELETO ---
+      const colorEsqueleto = feedbackVisual.esCorrecto ? '#00FF00' : '#FF0000';
+      
+      // Resaltar segmentos activos
+      if (ejercicio && ejercicio.reglasPostura) {
+         ctx.lineWidth = 6;
+         ctx.strokeStyle = colorEsqueleto;
+         ctx.lineCap = 'round';
+         ctx.lineJoin = 'round';
 
-        if (kp1 && kp2 && kp1.score > 0.3 && kp2.score > 0.3) {
-          // Escalado P1
-          const relX1 = kp1.x / canvasWidth;
-          const relY1 = kp1.y / canvasHeight;
-          const x1 = (relX1 * videoWidth * scale) + offsetX;
-          const y1 = (relY1 * videoHeight * scale) + offsetY;
+         ejercicio.reglasPostura.forEach(regla => {
+            if (regla.puntosActivos) {
+               const p1Name = regla.puntosActivos[0];
+               const p2Name = regla.puntosActivos[1];
+               const p3Name = regla.puntosActivos[2];
 
-          // Escalado P2
-          const relX2 = kp2.x / canvasWidth;
-          const relY2 = kp2.y / canvasHeight;
-          const x2 = (relX2 * videoWidth * scale) + offsetX;
-          const y2 = (relY2 * videoHeight * scale) + offsetY;
+               const kp1 = pose.keypoints.find(k => k.name === p1Name);
+               const kp2 = pose.keypoints.find(k => k.name === p2Name);
+               
+               if (kp1 && kp2) {
+                  const c1 = toCanvasCoords(kp1);
+                  const c2 = toCanvasCoords(kp2);
+                  ctx.beginPath();
+                  ctx.moveTo(c1.x, c1.y);
+                  ctx.lineTo(c2.x, c2.y);
+                  
+                  if (p3Name && p3Name !== 'vertical') {
+                     const kp3 = pose.keypoints.find(k => k.name === p3Name);
+                     if (kp3) {
+                        const c3 = toCanvasCoords(kp3);
+                        ctx.lineTo(c3.x, c3.y);
+                     }
+                  }
+                  ctx.stroke();
+               }
+            }
+         });
+      }
 
-          ctx.beginPath();
-          ctx.moveTo(x1, y1);
-          ctx.lineTo(x2, y2);
-          ctx.stroke();
+      // --- 3. DIBUJAR PUNTOS ---
+      ctx.fillStyle = colorEsqueleto;
+      for (let kp of pose.keypoints) {
+        if (kp.score > 0.5) {
+          const c = toCanvasCoords(kp);
+          
+          if (kp.anguloCalculado) {
+             ctx.beginPath(); ctx.arc(c.x, c.y, 8, 0, 2 * Math.PI); ctx.fill();
+             
+             ctx.font = "bold 24px Arial";
+             ctx.textAlign = "center";
+             ctx.strokeStyle = 'black';
+             ctx.lineWidth = 3;
+             ctx.strokeText(kp.anguloCalculado + "°", c.x, c.y - 20);
+             ctx.fillStyle = 'white';
+             ctx.fillText(kp.anguloCalculado + "°", c.x, c.y - 20);
+             ctx.fillStyle = colorEsqueleto; 
+          } else {
+             // Puntos normales más pequeños
+             ctx.beginPath(); ctx.arc(c.x, c.y, 4, 0, 2 * Math.PI); ctx.fill();
+          }
         }
       }
     }
@@ -259,10 +365,8 @@ function EjercicioEntrenamientoPage() {
   const handleVideoReady = () => {
     if (videoRef.current) {
       videoRef.current.play();
-      // NO tocamos el tamaño del canvas aquí, dejamos que el CSS y drawCanvas se encarguen
       if (loopRef.current) cancelAnimationFrame(loopRef.current);
       loopRef.current = requestAnimationFrame(poseLoop);
-      
       setFeedback(mode === 'webcam' ? '¡Cámara lista!' : '¡Vídeo listo!');
     }
   };
@@ -274,7 +378,7 @@ function EjercicioEntrenamientoPage() {
     }
   };
 
-  // 5. FEEDBACK
+  // 5. FEEDBACK Y GUARDADO
   const handleTerminar = () => {
     if (loopRef.current) cancelAnimationFrame(loopRef.current);
     if (videoRef.current) videoRef.current.pause();
@@ -302,7 +406,6 @@ function EjercicioEntrenamientoPage() {
   return (
     <div className="entrenamiento-container">
       <h2>{ejercicio ? ejercicio.nombreEjercicio : 'Entrenamiento'}</h2>
-
       {mode === 'select' && (
         <div className="mode-selector">
           <button className="boton-primario" onClick={startWebcam}>Usar Webcam</button>
@@ -311,63 +414,24 @@ function EjercicioEntrenamientoPage() {
           <label htmlFor="upload-video" className="boton-secundario">Subir Video</label>
         </div>
       )}
-
       <div className="media-container" style={{ display: mode === 'select' ? 'none' : 'block' }}>
-        <video 
-          ref={videoRef} 
-          id="video-feed" 
-          // ¡IMPORTANTE! VOLVEMOS A PONER EL TAMAÑO FIJO
-          width="640" 
-          height="480"
-          // -------------------------------------------
-          onCanPlay={handleVideoReady}
-          onEnded={handleVideoEnd}
-          playsInline
-          muted={mode === 'webcam'}
-          controls={mode === 'upload'}
-        ></video>
-        <canvas 
-          ref={canvasRef} 
-          id="pose-canvas" 
-          // ¡IMPORTANTE! VOLVEMOS A PONER EL TAMAÑO FIJO
-          width="640" 
-          height="480"
-          // -------------------------------------------
-        ></canvas>
+        <video ref={videoRef} id="video-feed" width="640" height="480" muted={mode === 'webcam'} playsInline onCanPlay={handleVideoReady} onEnded={handleVideoEnd} controls={mode === 'upload'}></video>
+        <canvas ref={canvasRef} id="pose-canvas" width="640" height="480"></canvas>
       </div>
-
       <div className="feedback-box">
         <h3>IA: {feedback}</h3>
-        {mode !== 'select' && (
-          <button onClick={handleTerminar} className="boton-primario" style={{marginTop: '1rem', width: '100%'}}>
-            Terminar y Guardar
-          </button>
-        )}
+        {mode !== 'select' && (<button onClick={handleTerminar} className="boton-primario" style={{marginTop: '1rem', width: '100%'}}>Terminar y Guardar</button>)}
       </div>
-
       {mostrarModal && (
         <div className="modal-overlay">
           <div className="modal-contenido">
             <div className="modal-header"><h3>📝 Resumen</h3></div>
             <form onSubmit={enviarFeedback}>
-              <div className="form-grupo">
-                <label>Dificultad</label>
-                <select value={dificultad} onChange={e => setDificultad(e.target.value)}>
-                  <option>Muy Fácil</option><option>Fácil</option><option>Normal</option><option>Difícil</option><option>Imposible</option>
-                </select>
-              </div>
-              <div className="form-grupo" style={{display:'flex', alignItems:'center', gap:'0.8rem', background: '#FFF5F5', padding: '10px', borderRadius: '8px', border: '1px dashed #FEB2B2'}}>
-                <label style={{margin:0, color: '#C53030', fontWeight: 'bold', cursor:'pointer'}} onClick={()=>setDolor(!dolor)}>¿Has sentido dolor?</label>
-                <input type="checkbox" checked={dolor} onChange={e => setDolor(e.target.checked)} className="checkbox-dolor"/>
-              </div>
-              <div className="form-grupo">
-                <textarea value={comentarios} onChange={e => setComentarios(e.target.value)} placeholder="Comentarios..." rows="3"></textarea>
-              </div>
+              <div className="form-grupo"><label>Dificultad</label><select value={dificultad} onChange={e => setDificultad(e.target.value)}><option>Muy Fácil</option><option>Fácil</option><option>Normal</option><option>Difícil</option><option>Imposible</option></select></div>
+              <div className="form-grupo" style={{display:'flex', alignItems:'center', gap:'0.8rem', background: '#FFF5F5', padding: '10px', borderRadius: '8px', border: '1px dashed #FEB2B2'}}><input type="checkbox" checked={dolor} onChange={e => setDolor(e.target.checked)} className="checkbox-dolor"/><label style={{margin:0, color: '#C53030', fontWeight: 'bold', cursor:'pointer'}} onClick={()=>setDolor(!dolor)}>¿Has sentido dolor?</label></div>
+              <div className="form-grupo"><textarea value={comentarios} onChange={e => setComentarios(e.target.value)} placeholder="Comentarios..." rows="3"></textarea></div>
               <button type="submit" className="boton-primario" style={{width:'100%'}}>Enviar</button>
-              <button type="button" className="boton-secundario" style={{width:'100%', marginTop:'0.5rem'}} onClick={() => {
-                setMostrarModal(false);
-                if (mode === 'webcam') { videoRef.current.play(); loopRef.current = requestAnimationFrame(poseLoop); }
-              }}>Cancelar</button>
+              <button type="button" className="boton-secundario" style={{width:'100%', marginTop:'0.5rem'}} onClick={() => { setMostrarModal(false); if (mode === 'webcam') { videoRef.current.play(); loopRef.current = requestAnimationFrame(poseLoop); }}}>Cancelar</button>
             </form>
           </div>
         </div>

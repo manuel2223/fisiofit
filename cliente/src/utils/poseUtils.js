@@ -1,21 +1,11 @@
 // En cliente/src/utils/poseUtils.js
 
-/**
- * Calcula el ángulo (en grados) entre tres puntos: A -> B -> C
- * B es el punto central (ej. la rodilla).
- */
 export function calculateAngle(a, b, c) {
-  // 1. Convertimos a coordenadas simples
   const radians = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
-  
-  // 2. Convertimos a Grados
   let angle = Math.abs(radians * 180.0 / Math.PI);
-  
-  // 3. Normalizamos (el ángulo nunca debe ser mayor de 180)
   if (angle > 180.0) {
     angle = 360 - angle;
   }
-  
   return angle;
 }
 
@@ -38,4 +28,23 @@ export function smoothKeypoints(currentKeypoints, previousKeypoints, alpha = 0.5
     }
     return keypoint;
   });
+}
+
+
+export function calculateIncline(puntoA, puntoB) {
+  // CORREGIDO: Ahora los argumentos coinciden con las variables internas
+  // puntoA = Hombro (arriba)
+  // puntoB = Cadera (abajo)
+  
+  const dy = puntoA.y - puntoB.y; 
+  const dx = puntoA.x - puntoB.x; 
+
+  let radians = Math.atan2(dx, dy); 
+  let angle = Math.abs(radians * 180.0 / Math.PI);
+  
+  if (angle > 90) {
+      angle = 180 - angle;
+  }
+  
+  return angle;
 }

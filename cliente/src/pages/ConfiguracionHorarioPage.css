@@ -1,0 +1,151 @@
+/* En cliente/src/pages/ConfiguracionHorarioPage.css */
+
+.container-horario {
+  width: 90%;
+  max-width: 800px;
+  margin: 2rem auto;
+}
+
+.container-horario h2 {
+  text-align: center;
+  color: var(--color-principal);
+  margin-bottom: 0.5rem;
+}
+
+.subtitulo {
+  text-align: center;
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.horario-card {
+  padding: 2rem;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.fila-dia {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.fila-dia:last-child {
+  border-bottom: none;
+}
+
+.fila-dia.inactivo {
+  opacity: 0.6; /* Desvanecer los días cerrados */
+}
+
+.nombre-dia {
+  width: 120px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.switch-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  width: 100px;
+}
+
+.switch-label input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-principal);
+}
+
+.estado-texto {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.selectores-hora {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.input-hora {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 1rem;
+  color: #333;
+}
+
+.texto-cerrado {
+  color: #999;
+  font-style: italic;
+  margin-right: 2rem;
+}
+
+.footer-horario {
+  margin-top: 2rem;
+  text-align: right;
+}
+
+.fila-dia-compleja {
+  border-bottom: 1px solid #eee;
+  padding: 1.5rem 0;
+}
+.fila-dia-compleja:last-child { border-bottom: none; }
+.fila-dia-compleja.inactivo { opacity: 0.5; }
+
+.dia-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.nombre-dia { font-weight: bold; font-size: 1.1rem; color: #333; }
+
+.controles-hora {
+  background-color: #F9FAFB;
+  padding: 1rem;
+  border-radius: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  align-items: center;
+}
+
+.bloque-hora, .inputs-descanso {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.label-mini { font-size: 0.85rem; color: #666; font-weight: 600; text-transform: uppercase; }
+
+input[type="time"] {
+  padding: 0.4rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+.bloque-descanso {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-left: 2px solid #eee;
+  padding-left: 1rem;
+}
+
+.footer-horario { margin-top: 2rem; text-align: right; }
+
+/* Switch y demás (reutilizar o mantener) */
+.switch-label { display: flex; gap: 0.5rem; cursor: pointer; align-items: center; }
+.switch-label input { width: 18px; height: 18px; accent-color: var(--color-principal); }

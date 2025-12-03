@@ -6,7 +6,7 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const fisioMiddleware = require('../middleware/fisioMiddleware');
 const AsignarRutinaUseCase = require('../../2_application/use_cases/AsignarRutinaUseCase');
-const { Usuario, Rutina, Ejercicio, Cita, EjercicioBiblioteca, Categoria, Resultado } = require('../../3_domain/models');
+const { Usuario, Rutina, Ejercicio, Cita, EjercicioBiblioteca, Categoria, Resultado, Disponibilidad } = require('../../3_domain/models');
 const sequelize = require('../../4_infrastructure/database/db');
 const { Op } = require('sequelize');
 
@@ -24,20 +24,26 @@ router.get('/pacientes', [authMiddleware, fisioMiddleware], async (req, res) => 
   }
 });
 
+// 2. Ruta GET /paciente/:id
 router.get('/paciente/:id', [authMiddleware, fisioMiddleware], async (req, res) => {
   try {
-    const paciente = await Usuario.findOne({
+    // Esta línea fallaba si 'Usuario' no estaba bien importado arriba
+    const paciente = await Usuario.findOne({ 
       where: { id: req.params.id, rol: 'paciente' },
       attributes: ['id', 'nombre', 'email']
     });
-    if (!paciente) return res.status(404).json({ msg: 'Paciente no encontrado' });
+
+    if (!paciente) {
+      return res.status(404).json({ msg: 'Paciente no encontrado' });
+    }
+    
     res.json(paciente);
+
   } catch (error) {
     console.error('Error al obtener paciente:', error);
     res.status(500).json({ msg: 'Error interno del servidor.' });
   }
 });
-
 // --- 3. RUTA DE ASIGNAR RUTINA (POST) ---
 router.post('/rutinas', [authMiddleware, fisioMiddleware], async (req, res) => {
   try {
@@ -302,6 +308,77 @@ router.get('/paciente/:id/resultados', [authMiddleware, fisioMiddleware], async 
   } catch (error) {
     console.error('Error al obtener resultados:', error);
     res.status(500).json({ msg: 'Error interno del servidor.' });
+  }
+});
+
+// --- GESTIÓN DE HORARIO ---
+// GET /api/fisio/horario
+router.get('/horario', [authMiddleware, fisioMiddleware], async (req, res) => {
+  try {
+    const horario = await Disponibilidad.findAll({
+      where: { fisioterapeutaId: req.usuario.id }
+    });
+    res.json(horario);
+  } catch (err) {
+    res.status(500).json({ msg: 'Error al obtener horario' });
+  }
+});
+
+// POST /api/fisio/horario (Guardar configuración masiva)
+router.post('/horario', [authMiddleware, fisioMiddleware], async (req, res) => {
+  const { dias } = req.body; // Array de objetos [{ diaSemana: 1, horaInicio: '09:00', ... }]
+  
+  try {
+    // Borramos lo anterior y guardamos lo nuevo (estrategia simple)
+    await Disponibilidad.destroy({ where: { fisioterapeutaId: req.usuario.id } });
+    
+    const nuevosDias = dias.map(d => ({ ...d, fisioterapeutaId: req.usuario.id }));
+    await Disponibilidad.bulkCreate(nuevosDias);
+    
+    res.json({ msg: 'Horario actualizado correctamente' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Error al guardar horario' });
+  }
+});
+
+// --- RUTA PARA OBTENER LAS RUTINAS DE UN PACIENTE ---
+// GET /api/fisio/paciente/:id/rutinas
+router.get('/paciente/:id/rutinas', [authMiddleware, fisioMiddleware], async (req, res) => {
+  try {
+    const rutinas = await Rutina.findAll({
+      where: { pacienteAsignadoId: req.params.id },
+      include: [{ 
+        model: Ejercicio, 
+        as: 'ejercicios' // Muestra los ejercicios dentro de cada rutina
+      }],
+      order: [['createdAt', 'DESC']] // Las más nuevas primero
+    });
+    res.json(rutinas);
+  } catch (error) {
+    console.error('Error al obtener rutinas:', error);
+    res.status(500).json({ msg: 'Error interno al cargar rutinas.' });
+  }
+});
+
+// --- RUTA PARA BORRAR UNA RUTINA (Ya que estás, añade esta también por si acaso) ---
+// DELETE /api/fisio/rutinas/:id
+router.delete('/rutinas/:id', [authMiddleware, fisioMiddleware], async (req, res) => {
+  try {
+    const rutina = await Rutina.findByPk(req.params.id);
+    
+    if (!rutina) return res.status(404).json({ msg: 'Rutina no encontrada' });
+    
+    // Seguridad extra: verificar que el fisio es el dueño
+    if (rutina.fisioterapeutaCreadorId !== req.usuario.id) {
+      return res.status(403).json({ msg: 'No tienes permiso para borrar esta rutina.' });
+    }
+
+    await rutina.destroy();
+    res.json({ msg: 'Rutina eliminada correctamente' });
+  } catch (error) {
+    console.error('Error al borrar rutina:', error);
+    res.status(500).json({ msg: 'Error interno al borrar.' });
   }
 });
 

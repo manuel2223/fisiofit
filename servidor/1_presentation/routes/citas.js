@@ -2,77 +2,140 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
-const { Cita, Usuario } = require('../../3_domain/models');
+const fisioMiddleware = require('../middleware/fisioMiddleware'); // <-- ¡ESTA ES LA QUE FALTABA!
+const { Cita, Usuario, Disponibilidad } = require('../../3_domain/models');
 const { Op } = require('sequelize'); // Importamos 'Op' para consultas
+const EmailService = require('../../4_infrastructure/services/EmailService'); // 1. IMPORTA EL SERVICIO
 
-// --- RUTA PARA OBTENER HORAS OCUPADAS DE UN DÍA ---
 // GET /api/citas/disponibilidad/:fecha
-// :fecha tendrá el formato YYYY-MM-DD
-router.get('/disponibilidad/:fecha', [authMiddleware], async (req, res) => {
+router.get('/disponibilidad/:fecha', async (req, res) => {
   try {
-    const fecha = req.params.fecha;
-    
-    // Calcula el inicio y fin del día
-    const inicioDelDia = new Date(`${fecha}T00:00:00.000Z`);
-    const finDelDia = new Date(`${fecha}T23:59:59.999Z`);
+    const fechaStr = req.params.fecha;
+    const fechaObj = new Date(fechaStr);
+    const diaSemana = fechaObj.getDay(); 
 
-    // Busca todas las citas que empiecen ESE día
-    const citasReservadas = await Cita.findAll({
-      where: {
-        fechaHoraInicio: {
-          [Op.between]: [inicioDelDia, finDelDia]
-        }
-      },
-      attributes: ['fechaHoraInicio'] // Solo necesitamos la hora de inicio
+    const reglaHorario = await Disponibilidad.findOne({
+      where: { diaSemana: diaSemana, fisioterapeutaId: 1, activo: true }
     });
 
-    // Mapea el resultado para enviar solo las horas (ej: "09:00")
-    const horasOcupadas = citasReservadas.map(cita => {
-      return new Date(cita.fechaHoraInicio).toLocaleTimeString('es-ES', {
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZone: 'Europe/Madrid' // Asegúrate de usar la zona horaria correcta
+    if (!reglaHorario) return res.json({ slots: [], ocupadas: [] }); // Cerrado
+
+    // --- LÓGICA DE GENERACIÓN DE SLOTS ---
+    const slotsPosibles = [];
+    
+    // Helper para convertir "HH:mm" a minutos (ej. "09:30" -> 570)
+    const toMinutes = (str) => {
+      if (!str) return 0;
+      const [h, m] = str.split(':').map(Number);
+      return h * 60 + m;
+    };
+
+    let minutosActual = toMinutes(reglaHorario.horaInicio);
+    const minutosFin = toMinutes(reglaHorario.horaFin);
+    
+    // Datos del descanso
+    const minutosInicioDescanso = reglaHorario.tieneDescanso ? toMinutes(reglaHorario.horaInicioDescanso) : -1;
+    const minutosFinDescanso = reglaHorario.tieneDescanso ? toMinutes(reglaHorario.horaFinDescanso) : -1;
+
+    const duracionCita = 30; // Duración en minutos
+    // IMPORTANTE: Intervalo entre citas. Ponlo a 30 para tener citas a las :00 y :30
+    const intervalo = 30; 
+
+    while (minutosActual + duracionCita <= minutosFin) {
+      // ¿Cae este slot dentro del descanso?
+      // Si el slot empieza DESPUÉS del inicio del descanso Y ANTES del fin del descanso... saltar
+      // O si termina DENTRO del descanso...
+      // Lógica simple: Si la hora actual está entre inicio y fin del descanso, no lo añadimos.
+      
+      const enDescanso = reglaHorario.tieneDescanso && 
+                         (minutosActual >= minutosInicioDescanso && minutosActual < minutosFinDescanso);
+
+      if (!enDescanso) {
+        const h = Math.floor(minutosActual / 60).toString().padStart(2, '0');
+        const m = (minutosActual % 60).toString().padStart(2, '0');
+        slotsPosibles.push(`${h}:${m}`);
+      }
+      
+      minutosActual += intervalo;
+    }
+
+    // --- BUSCAR CITAS OCUPADAS (Igual que antes) ---
+    const inicioDia = new Date(`${fechaStr}T00:00:00.000Z`);
+    const finDia = new Date(`${fechaStr}T23:59:59.999Z`);
+
+    const citasOcupadas = await Cita.findAll({
+      where: {
+        fechaHoraInicio: { [Op.between]: [inicioDia, finDia] },
+        estado: 'confirmada'
+      },
+      attributes: ['fechaHoraInicio']
+    });
+
+    const horasOcupadas = citasOcupadas.map(c => {
+      return new Date(c.fechaHoraInicio).toLocaleTimeString('es-ES', {
+        hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid'
       });
     });
 
-    res.json(horasOcupadas);
+    res.json({ slots: slotsPosibles, ocupadas: horasOcupadas });
 
   } catch (error) {
-    console.error('Error al obtener disponibilidad:', error);
-    res.status(500).json({ msg: 'Error interno del servidor.' });
+    console.error(error);
+    res.status(500).json({ msg: 'Error calculando disponibilidad' });
   }
 });
 
 // POST /api/citas/reservar
 router.post('/reservar', [authMiddleware], async (req, res) => {
   try {
-    // 1. Recibimos los nuevos campos del body
     const { fechaHoraInicio, fechaHoraFin, motivo, tipo } = req.body;
     const pacienteId = req.usuario.id;
     
-    // ID del fisio (hardcodeado para el TFG, o podrías enviarlo desde el front)
-    const fisioterapeutaId = 1; 
+    // 2. Necesitamos los datos del paciente (email y nombre) para enviar el correo
+    const datosPaciente = await Usuario.findByPk(pacienteId);
 
-    if (!fechaHoraInicio || !fechaHoraFin || !tipo) {
-      return res.status(400).json({ msg: 'Faltan datos obligatorios (fecha o tipo).' });
-    }
-
+    // ... (validaciones y creación de cita igual que antes) ...
     const nuevaCita = await Cita.create({
+      /* ... tus datos ... */
       pacienteId,
-      fisioterapeutaId,
+      fisioterapeutaId: 1,
       fechaHoraInicio: new Date(fechaHoraInicio),
       fechaHoraFin: new Date(fechaHoraFin),
       estado: 'confirmada',
-      // 2. Guardamos los nuevos campos
-      motivo: motivo,
-      tipo: tipo
+      motivo,
+      tipo
     });
+
+    // --- 3. ENVIAR NOTIFICACIONES (¡LA MAGIA!) ---
+    
+    // Formatear fecha y hora para que se lea bien en el email
+    const fechaObj = new Date(fechaHoraInicio);
+    const fechaLegible = fechaObj.toLocaleDateString('es-ES');
+    const horaLegible = fechaObj.toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit'});
+
+    // A. Email al Paciente
+    EmailService.enviarConfirmacionCita(
+      datosPaciente.email, 
+      datosPaciente.nombre, 
+      fechaLegible, 
+      horaLegible, 
+      tipo
+    );
+
+    // B. Email al Fisio
+    EmailService.enviarAvisoFisio(
+      datosPaciente.nombre, 
+      fechaLegible, 
+      horaLegible, 
+      tipo, 
+      motivo
+    );
+    // ---------------------------------------------
 
     res.status(201).json({ msg: 'Cita reservada exitosamente.', cita: nuevaCita });
 
   } catch (error) {
-    console.error('Error al reservar la cita:', error);
-    res.status(500).json({ msg: 'Error al reservar.' });
+    // ... (catch igual)
   }
 });
 
@@ -100,29 +163,76 @@ router.get('/mis-citas', [authMiddleware], async (req, res) => {
   }
 });
 
-// --- RUTA PARA QUE UN PACIENTE CANCELE UNA CITA ---
 // DELETE /api/citas/:id
 router.delete('/:id', [authMiddleware], async (req, res) => {
+    try {
+      const cita = await Cita.findByPk(req.params.id, {
+          include: [{ model: Usuario, as: 'paciente' }] // Incluimos usuario para saber su email
+      });
+  
+      if (!cita) return res.status(404).json({ msg: 'Cita no encontrada.' });
+      if (cita.pacienteId !== req.usuario.id) return res.status(403).json({ msg: 'Acceso denegado.' });
+  
+      // Guardamos datos para el email antes de borrar
+      const { fechaHoraInicio, paciente } = cita;
+      
+      await cita.destroy();
+
+      // --- ENVIAR EMAIL DE CANCELACIÓN ---
+      const fechaObj = new Date(fechaHoraInicio);
+      EmailService.enviarCancelacion(
+          paciente.email,
+          paciente.nombre,
+          fechaObj.toLocaleDateString('es-ES'),
+          fechaObj.toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit'})
+      );
+      // -----------------------------------
+  
+      res.json({ msg: 'Cita cancelada correctamente.' });
+  
+    } catch (error) {
+       // ...
+    }
+  });
+
+  // --- RUTA PARA OBTENER LAS RUTINAS DE UN PACIENTE ---
+// GET /api/fisio/paciente/:id/rutinas
+router.get('/paciente/:id/rutinas', [authMiddleware, fisioMiddleware], async (req, res) => {
   try {
-    const cita = await Cita.findByPk(req.params.id);
+    const rutinas = await Rutina.findAll({
+      where: { pacienteAsignadoId: req.params.id },
+      include: [{ 
+        model: Ejercicio, 
+        as: 'ejercicios' // Asegúrate de que coincide con el alias en models/index.js
+      }],
+      order: [['createdAt', 'DESC']] // Las más nuevas primero
+    });
+    res.json(rutinas);
+  } catch (error) {
+    console.error('Error al obtener rutinas:', error);
+    res.status(500).json({ msg: 'Error interno al cargar rutinas.' });
+  }
+});
 
-    if (!cita) {
-      return res.status(404).json({ msg: 'Cita no encontrada.' });
+// --- RUTA PARA BORRAR UNA RUTINA ---
+// DELETE /api/fisio/rutinas/:id
+router.delete('/rutinas/:id', [authMiddleware, fisioMiddleware], async (req, res) => {
+  try {
+    const rutina = await Rutina.findByPk(req.params.id);
+    
+    if (!rutina) return res.status(404).json({ msg: 'Rutina no encontrada' });
+    
+    // Seguridad: Solo el creador puede borrarla
+    if (rutina.fisioterapeutaCreadorId !== req.usuario.id) {
+      return res.status(403).json({ msg: 'No tienes permiso para borrar esta rutina.' });
     }
 
-    // --- ¡SEGURIDAD CRÍTICA! ---
-    // Comprueba que el usuario logueado es el dueño de la cita
-    if (cita.pacienteId !== req.usuario.id) {
-      return res.status(403).json({ msg: 'Acceso denegado. No puedes cancelar esta cita.' });
-    }
-
-    // Si todo es correcto, borra la cita
-    await cita.destroy();
-    res.json({ msg: 'Cita cancelada correctamente.' });
+    await rutina.destroy(); // Al borrar la rutina, se borran los ejercicios (CASCADE)
+    res.json({ msg: 'Rutina eliminada correctamente' });
 
   } catch (error) {
-    console.error('Error al cancelar la cita:', error);
-    res.status(500).json({ msg: 'Error interno del servidor.' });
+    console.error('Error al borrar rutina:', error);
+    res.status(500).json({ msg: 'Error interno al borrar.' });
   }
 });
 

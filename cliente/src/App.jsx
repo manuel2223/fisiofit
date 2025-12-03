@@ -14,6 +14,7 @@ import AsignarRutinaPage from './pages/AsignarRutinaPage'; // <-- 1. Importa la 
 import FisioBibliotecaPage from './pages/FisioBibliotecaPage'; // <-- 1. Importa
 import EjercicioEntrenamientoPage from './pages/EjercicioEntrenamientoPage'; // <-- ¿Está esta línea?
 import PacienteDetallePage from './pages/PacienteDetallePage'; // 1. Importa
+import ConfiguracionHorarioPage from './pages/ConfiguracionHorarioPage';
 import { Toaster } from 'react-hot-toast';
 
 
@@ -44,6 +45,7 @@ function App() {
             
             <Route path="/fisio/asignar/:pacienteId" element={<AsignarRutinaPage />} />
             <Route path="/fisio/biblioteca" element={<FisioBibliotecaPage />} />
+            <Route path="/fisio/horario" element={<ConfiguracionHorarioPage />} />
             <Route path="/fisio/paciente/:id" element={<PacienteDetallePage />} />
             
           </Route>

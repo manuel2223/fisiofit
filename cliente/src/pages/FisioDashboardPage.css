@@ -212,3 +212,39 @@
   transform: translateY(0); /* Vuelve a bajar al hacer clic */
   background-color: #e5e7eb;
 }
+
+.dashboard-actions {
+  margin-bottom: 2rem;
+  padding: 2rem; /* Más espacio interior (padding) */
+
+
+  
+  /* Flexbox para centrar y espaciar */
+  display: flex;
+  justify-content: center; /* Centra horizontalmente */
+  align-items: center;     /* Centra verticalmente */
+  gap: 2rem;               /* Espacio entre los botones */
+  flex-wrap: wrap;         /* Permite que bajen de línea si la pantalla es pequeña */
+  
+}
+
+/* Hacemos que los botones tengan un ancho mínimo para verse uniformes */
+.dashboard-actions .boton-primario,
+.dashboard-actions .boton-secundario {
+    margin: 0 !important; /* Elimina cualquier margen heredado de otras páginas */
+  align-self: center;
+  
+  flex: 0 1 300px; /* No crecer más de 300px, pero encoger si hace falta */
+  text-align: center;
+  display: flex;          /* Para centrar icono y texto dentro del botón */
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+} 
+
+
+.dashboard-actions .boton-primario {
+  border: 2px solid transparent !important; 
+}
+
+/* (Opcional) Aseguramos que el secundario tenga su borde visible */

@@ -3,14 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Calendar from 'react-calendar';
 import api from '../api';
-import toast from 'react-hot-toast'; // 1. IMPORTAR TOAST
+import toast from 'react-hot-toast';
 import 'react-calendar/dist/Calendar.css';
 import './ReservarCitaPage.css';
 
-const HORARIOS_BASE = [
-  '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
-  '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30'
-];
+// 1. ¡BORRAMOS LA CONSTANTE HORARIOS_BASE! Ya no la necesitamos.
 
 const TIPOS_CITA = [
   'Valoración Inicial', 
@@ -22,6 +19,10 @@ const TIPOS_CITA = [
 
 function ReservarCitaPage() {
   const [fechaSeleccionada, setFechaSeleccionada] = useState(new Date());
+  
+  // 2. NUEVO ESTADO: Slots disponibles (los botones a pintar)
+  const [slotsDisponibles, setSlotsDisponibles] = useState([]);
+  
   const [horariosOcupados, setHorariosOcupados] = useState([]);
   const [horaSeleccionada, setHoraSeleccionada] = useState(null);
   const [cargandoHoras, setCargandoHoras] = useState(false);
@@ -31,7 +32,11 @@ function ReservarCitaPage() {
 
   const navigate = useNavigate();
 
+  // Función para deshabilitar días visualmente (opcional, pero queda bien)
+  // (Nota: Aunque el backend también filtra, esto ayuda visualmente)
   const deshabilitarFinesDeSemana = ({ date, view }) => {
+    // Podríamos mejorar esto trayendo los días "activos" del backend,
+    // pero por defecto seguimos marcando Sáb/Dom en gris.
     if (view === 'month') {
       return date.getDay() === 0 || date.getDay() === 6;
     }
@@ -41,6 +46,7 @@ function ReservarCitaPage() {
   useEffect(() => {
     setHoraSeleccionada(null);
     setCargandoHoras(true);
+    setSlotsDisponibles([]); // Limpiamos al cambiar de día
 
     const anio = fechaSeleccionada.getFullYear();
     const mes = String(fechaSeleccionada.getMonth() + 1).padStart(2, '0');
@@ -49,28 +55,25 @@ function ReservarCitaPage() {
 
     api.get(`/citas/disponibilidad/${fechaFormatoAPI}`)
       .then(respuesta => {
-        setHorariosOcupados(respuesta.data);
+        // 3. LA API AHORA DEVUELVE DOS LISTAS
+        // respuesta.data = { slots: ["09:00", ...], ocupadas: ["10:00"] }
+        setSlotsDisponibles(respuesta.data.slots || []);
+        setHorariosOcupados(respuesta.data.ocupadas || []);
       })
       .catch(error => {
         console.error("Error:", error);
-        toast.error("No se pudieron cargar los horarios"); // Toast de error
+        toast.error("No se pudo cargar la disponibilidad");
       })
       .finally(() => setCargandoHoras(false));
 
   }, [fechaSeleccionada]);
 
   const handleConfirmarReserva = async () => {
-    // Validaciones con Toast
     if (!horaSeleccionada) {
       toast.error("Por favor, selecciona una hora.");
       return;
     }
-    if (!tipoCita) {
-      toast.error("Por favor, selecciona un tipo de cita.");
-      return;
-    }
 
-    // Toast de carga
     const toastId = toast.loading('Reservando cita...');
 
     try {
@@ -78,7 +81,8 @@ function ReservarCitaPage() {
       const fechaHoraInicio = new Date(fechaSeleccionada);
       fechaHoraInicio.setHours(hora, minuto, 0, 0);
       
-      const fechaHoraFin = new Date(fechaHoraInicio.getTime() + 50 * 60000);
+      // Duración estándar de 30 min (o lo que definas en backend)
+      const fechaHoraFin = new Date(fechaHoraInicio.getTime() + 30 * 60000);
 
       await api.post('/citas/reservar', { 
         fechaHoraInicio: fechaHoraInicio.toISOString(),
@@ -87,13 +91,10 @@ function ReservarCitaPage() {
         motivo: motivo
       });
 
-      // Éxito
       toast.success('¡Cita reservada con éxito!', { id: toastId });
       navigate('/mi-cuenta'); 
 
     } catch (error) {
-      console.error("Error al reservar:", error);
-      // Error
       const msg = error.response?.data?.msg || "Error al reservar la cita.";
       toast.error(msg, { id: toastId });
     }
@@ -143,37 +144,42 @@ function ReservarCitaPage() {
             <div className="skeleton skeleton-box" style={{height: '100px'}}></div>
           ) : (
             <div className="horas-grid">
-              {HORARIOS_BASE.map(hora => {
-                const [h, m] = hora.split(':');
-                const fechaSlot = new Date(fechaSeleccionada);
-                fechaSlot.setHours(h, m, 0, 0);
-                const ahora = new Date();
-                const yaPaso = fechaSlot < ahora;
-                const estaOcupada = horariosOcupados.includes(hora);
-                const diaSemana = fechaSeleccionada.getDay();
-                const esFinDeSemana = diaSemana === 0 || diaSemana === 6; // 0=Dom, 6=Sab
+              {/* 4. MENSAJE SI NO HAY HUECOS (Día cerrado o lleno) */}
+              {slotsDisponibles.length === 0 ? (
+                <p style={{color: '#666', fontStyle: 'italic'}}>No hay horas disponibles para este día.</p>
+              ) : (
+                /* 5. MAPEAR LOS SLOTS DINÁMICOS */
+                slotsDisponibles.map(hora => {
+                  const [h, m] = hora.split(':');
+                  const fechaSlot = new Date(fechaSeleccionada);
+                  fechaSlot.setHours(h, m, 0, 0);
+                  
+                  const ahora = new Date();
+                  
+                  // Comprobaciones
+                  const yaPaso = fechaSlot < ahora;
+                  const estaOcupada = horariosOcupados.includes(hora);
+                  
+                  const deshabilitado = estaOcupada || yaPaso;
+                  const esSeleccionada = hora === horaSeleccionada;
 
-                // 3. Añadimos la condición al deshabilitado
-                const deshabilitado = estaOcupada || yaPaso || esFinDeSemana;
-                const esSeleccionada = hora === horaSeleccionada;
+                  let titulo = "";
+                  if (yaPaso) titulo = "Hora pasada";
+                  else if (estaOcupada) titulo = "Ya reservada";
 
-                let mensajeTitulo = "";
-                if (esFinDeSemana) mensajeTitulo = "La clínica cierra los fines de semana";
-                else if (yaPaso) mensajeTitulo = "Esta hora ya ha pasado";
-                else if (estaOcupada) mensajeTitulo = "Hora ocupada";
-
-                return (
-                  <button 
-                    key={hora}
-                    className={`hora-boton ${esSeleccionada ? 'seleccionada' : ''}`}
-                    disabled={deshabilitado}
-                    onClick={() => setHoraSeleccionada(hora)}
-                    title={mensajeTitulo} 
-                  >
-                    {hora}
-                  </button>
-                );
-              })}
+                  return (
+                    <button 
+                      key={hora}
+                      className={`hora-boton ${esSeleccionada ? 'seleccionada' : ''}`}
+                      disabled={deshabilitado}
+                      onClick={() => setHoraSeleccionada(hora)}
+                      title={titulo}
+                    >
+                      {hora}
+                    </button>
+                  );
+                })
+              )}
             </div>
           )}
 

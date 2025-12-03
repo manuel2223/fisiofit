@@ -70,7 +70,7 @@ function EjercicioEntrenamientoPage() {
     };
   }, [ejercicioId]);
 
-  // 2. BUCLE IA
+  // 2. BUCLE IA (CEREBRO)
   const poseLoop = async () => {
     if (detectorRef.current && videoRef.current && canvasRef.current) {
       if (videoRef.current.readyState < 2) {
@@ -109,12 +109,11 @@ function EjercicioEntrenamientoPage() {
              const p2 = pose.keypoints.find(k => k.name === regla.puntos[1]);
              
              if (p1 && p2 && p1.score > 0.5 && p2.score > 0.5) {
-                // No añadimos punto virtual al array de TF, lo manejamos en dibujo
                 const inclinacion = calculateIncline(p1, p2);
                 const [min, max] = regla.rangoCorrecto;
                 
                 p2.anguloCalculado = Math.round(inclinacion);
-                // Marcamos puntos activos para dibujar
+                // Guardamos puntos para dibujar la línea amarilla
                 regla.puntosActivos = [p1.name, p2.name, 'vertical']; 
 
                 if (inclinacion < min || inclinacion > max) {
@@ -175,20 +174,18 @@ function EjercicioEntrenamientoPage() {
     ctx.beginPath();
     ctx.moveTo(center.x, center.y);
     ctx.arc(center.x, center.y, radius, angle1, angle2, !isClockwise);
-    ctx.fillStyle = "rgba(255, 215, 0, 0.2)"; // Amarillo semitransparente
+    ctx.fillStyle = "rgba(255, 215, 0, 0.2)"; 
     ctx.fill();
 
     ctx.strokeStyle = "gold";
     ctx.lineWidth = 3;
     ctx.setLineDash([5, 5]);
 
-    ctx.beginPath();
-    ctx.moveTo(center.x, center.y);
+    ctx.beginPath(); ctx.moveTo(center.x, center.y);
     ctx.lineTo(center.x + Math.cos(angle1) * radius, center.y + Math.sin(angle1) * radius);
     ctx.stroke();
 
-    ctx.beginPath();
-    ctx.moveTo(center.x, center.y);
+    ctx.beginPath(); ctx.moveTo(center.x, center.y);
     ctx.lineTo(center.x + Math.cos(angle2) * radius, center.y + Math.sin(angle2) * radius);
     ctx.stroke();
     ctx.restore();
@@ -222,7 +219,7 @@ function EjercicioEntrenamientoPage() {
         offsetX = (canvasWidth - videoWidth * scale) / 2;
       }
       
-      // Función para transformar coordenadas de TFJS al canvas
+      // Función para transformar coordenadas
       const toCanvasCoords = (kp) => ({
         x: kp.x * scale + offsetX,
         y: kp.y * scale + offsetY
@@ -232,7 +229,6 @@ function EjercicioEntrenamientoPage() {
       if (ejercicio && ejercicio.reglasPostura) {
          ejercicio.reglasPostura.forEach(regla => {
             if (regla.puntosActivos) {
-               // Recuperar coordenadas escaladas
                const p1Name = regla.puntosActivos[0];
                const p2Name = regla.puntosActivos[1];
                const p3Name = regla.puntosActivos[2];
@@ -240,13 +236,12 @@ function EjercicioEntrenamientoPage() {
                const kp1 = pose.keypoints.find(k => k.name === p1Name);
                const kp2 = pose.keypoints.find(k => k.name === p2Name);
                
-               // Si es la regla de espalda (vertical), no necesitamos p3
+               // Caso Espalda (Vertical)
                if (p3Name === 'vertical' && kp1 && kp2) {
                   const center = toCanvasCoords(kp2);
-                  // Dibuja respecto a la vertical (-PI/2)
                   drawArcGuide(ctx, center, -Math.PI / 2, regla.rangoCorrecto, true);
                } 
-               // Regla normal (3 puntos)
+               // Caso Normal
                else {
                   const kp3 = pose.keypoints.find(k => k.name === p3Name);
                   if (kp1 && kp2 && kp3) {
@@ -254,7 +249,6 @@ function EjercicioEntrenamientoPage() {
                      const center = toCanvasCoords(kp2);
                      const end = toCanvasCoords(kp3);
                      
-                     // Calcular ángulo base y dirección
                      const angleBase = Math.atan2(start.y - center.y, start.x - center.x);
                      const det = (start.x - center.x) * (end.y - center.y) - (start.y - center.y) * (end.x - center.x);
                      const isClockwise = det > 0;
@@ -269,13 +263,13 @@ function EjercicioEntrenamientoPage() {
       // --- 2. DIBUJAR ESQUELETO ---
       const colorEsqueleto = feedbackVisual.esCorrecto ? '#00FF00' : '#FF0000';
       
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = colorEsqueleto;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
       // Resaltar segmentos activos
       if (ejercicio && ejercicio.reglasPostura) {
-         ctx.lineWidth = 6;
-         ctx.strokeStyle = colorEsqueleto;
-         ctx.lineCap = 'round';
-         ctx.lineJoin = 'round';
-
          ejercicio.reglasPostura.forEach(regla => {
             if (regla.puntosActivos) {
                const p1Name = regla.puntosActivos[0];
@@ -305,7 +299,7 @@ function EjercicioEntrenamientoPage() {
          });
       }
 
-      // --- 3. DIBUJAR PUNTOS ---
+      // --- 3. DIBUJAR PUNTOS Y TEXTO ---
       ctx.fillStyle = colorEsqueleto;
       for (let kp of pose.keypoints) {
         if (kp.score > 0.5) {
@@ -323,15 +317,17 @@ function EjercicioEntrenamientoPage() {
              ctx.fillText(kp.anguloCalculado + "°", c.x, c.y - 20);
              ctx.fillStyle = colorEsqueleto; 
           } else {
-             // Puntos normales más pequeños
+             // Puntos normales más pequeños (blancos)
+             ctx.fillStyle = 'white';
              ctx.beginPath(); ctx.arc(c.x, c.y, 4, 0, 2 * Math.PI); ctx.fill();
+             ctx.fillStyle = colorEsqueleto; // Restaurar
           }
         }
       }
     }
   };
 
-  // 4. CONTROLES
+  // 4. CONTROLES (Iguales)
   const startWebcam = async () => {
     try {
       setFeedback('Accediendo a la cámara...');
@@ -351,8 +347,7 @@ function EjercicioEntrenamientoPage() {
     const file = e.target.files[0];
     if (file) {
       if (videoRef.current && videoRef.current.srcObject) {
-        const tracks = videoRef.current.srcObject.getTracks();
-        tracks.forEach(t => t.stop());
+        videoRef.current.srcObject.getTracks().forEach(t => t.stop());
         videoRef.current.srcObject = null;
       }
       const url = URL.createObjectURL(file);

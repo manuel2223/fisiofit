@@ -1,8 +1,7 @@
-// En cliente/src/pages/AsignarRutinaPage.jsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
-import toast from 'react-hot-toast'; // 1. Importamos Toast
+import toast from 'react-hot-toast';
 import './AsignarRutinaPage.css';
 
 function AsignarRutinaPage() {
@@ -76,7 +75,7 @@ function AsignarRutinaPage() {
         repeticiones: 10
       }
     ]);
-    toast.success('Ejercicio añadido', { duration: 1000 }); // Feedback rápido
+    toast.success('Ejercicio añadido', { duration: 1000 });
   };
 
   const removeEjercicioFromRutina = (index) => {
@@ -92,7 +91,7 @@ function AsignarRutinaPage() {
     setEjerciciosRutina(nuevosEjercicios);
   };
 
-  // 4. Envío del Formulario (MEJORADO)
+  // 4. Envío del Formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErroresCampos({}); // Reiniciar errores visuales
@@ -116,7 +115,7 @@ function AsignarRutinaPage() {
       toast.error('La rutina debe tener al menos un ejercicio.');
       return;
     }
-    // ------------------
+  
 
     const toastId = toast.loading('Asignando rutina...');
 

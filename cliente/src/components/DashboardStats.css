@@ -1,10 +1,8 @@
-/* En cliente/src/components/DashboardStats.css */
-
 .stats-container {
   margin-bottom: 2rem;
 }
 
-/* Grid de KPIs */
+
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -20,7 +18,7 @@
   border: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
-  /* Pequeña animación al cargar */
+
   animation: fadeUp 0.5s ease-out;
 }
 
@@ -45,12 +43,12 @@
   color: #888;
 }
 
-/* Colores de acento laterales */
+
 .kpi-card.azul { border-left: 5px solid #3B82F6; }
 .kpi-card.verde { border-left: 5px solid #10B981; }
 .kpi-card.morada { border-left: 5px solid #8B5CF6; }
 
-/* Tarjeta del Gráfico */
+
 .chart-card {
   padding: 1.5rem;
   animation: fadeUp 0.6s ease-out;
@@ -75,14 +73,14 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* --- NUEVO: GRID PARA GRÁFICOS --- */
+
 .charts-grid {
   display: grid;
   grid-template-columns: 2fr 1fr; /* El de barras ocupa 2/3, el donut 1/3 */
   gap: 1.5rem;
 }
 
-/* Hacemos que sea responsive (en móvil uno debajo de otro) */
+
 @media (max-width: 768px) {
   .charts-grid {
     grid-template-columns: 1fr;
@@ -93,7 +91,7 @@
 .chart-card {
   padding: 1.5rem;
   animation: fadeUp 0.6s ease-out;
-  min-height: 350px; /* Altura mínima para que se vean bien */
+  min-height: 350px; 
 }
 
 .chart-card h3 {

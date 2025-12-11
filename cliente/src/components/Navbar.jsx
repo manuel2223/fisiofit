@@ -1,11 +1,9 @@
-// En cliente/src/components/Navbar.jsx
-
 import React from 'react';
-import { Link } from 'react-router-dom'; // Importamos Link
-import { useAuth } from '../context/AuthContext'; // Importamos el hook de Auth
+import { Link } from 'react-router-dom'; 
+import { useAuth } from '../context/AuthContext'; 
 import logoFisioFit from '../assets/logofisiofit.png';
 
-// Tus estilos (no los toques, están bien)
+
 const styles = {
   navbar: {
     backgroundColor: 'var(--color-blanco)',
@@ -21,13 +19,13 @@ const styles = {
     textDecoration: 'none',
   },
   logoImage: {
-    height: '40px', // Ajusta esta altura como veas
+    height: '40px', 
     width: 'auto',
   },
   navLinks: {
     display: 'flex',
     gap: '1.5rem',
-    alignItems: 'center', // Alinea los botones con los enlaces
+    alignItems: 'center', 
   },
   navLink: {
     color: 'var(--color-texto)',
@@ -50,7 +48,6 @@ function Navbar() {
       <div style={styles.navLinks}>
         <Link to="/" style={styles.navLink}>Inicio</Link>
         
-        {/* 1. MUEVE ESTE ENLACE AFUERA DE LA CONDICIÓN */}
         <Link to="/reservar" style={styles.navLink}>Reservar Cita</Link>
         
 

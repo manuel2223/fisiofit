@@ -1,12 +1,11 @@
-// En cliente/src/components/DashboardStats.jsx
 import React from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend // Importamos componentes de PieChart
+  PieChart, Pie, Cell, Legend
 } from 'recharts';
 import './DashboardStats.css';
 
-// Colores profesionales para el Donut
+// colores del donut
 const COLORS = ['#008080', '#88D498', '#2F4858', '#004e4e', '#5FA8D3'];
 
 function DashboardStats({ stats, cargando }) {
@@ -19,7 +18,7 @@ function DashboardStats({ stats, cargando }) {
   return (
     <div className="stats-container">
       
-      {/* --- KPIs (Igual que antes) --- */}
+      {/* --- KPIs --- */}
       <div className="kpi-grid">
         <div className="kpi-card azul">
           <h3>Citas Hoy</h3>
@@ -38,7 +37,7 @@ function DashboardStats({ stats, cargando }) {
         </div>
       </div>
 
-      {/* --- GRÁFICOS (AHORA EN GRID DE 2) --- */}
+      {/* --- GRÁFICOS --- */}
       <div className="charts-grid">
         
         {/* Gráfico 1: Barras (Semana) */}
@@ -64,7 +63,7 @@ function DashboardStats({ stats, cargando }) {
           </div>
         </div>
 
-        {/* Gráfico 2: Donut (Tipos) - NUEVO */}
+        {/* Gráfico 2: Donut (Tipos) */}
         <div className="chart-card tarjeta">
           <h3>Tipos de Sesión (Global)</h3>
           <div style={{ width: '100%', height: 300 }}>
@@ -75,7 +74,7 @@ function DashboardStats({ stats, cargando }) {
                     data={stats.graficoTipos}
                     cx="50%"
                     cy="50%"
-                    innerRadius={60} // Esto lo hace un Donut
+                    innerRadius={60} 
                     outerRadius={80}
                     paddingAngle={5}
                     dataKey="value"

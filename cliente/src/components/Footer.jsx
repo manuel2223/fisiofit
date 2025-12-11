@@ -1,4 +1,3 @@
-// En cliente/src/components/Footer.jsx
 import React from 'react';
 
 const styles = {

@@ -180,4 +180,20 @@ router.put('/me', [authMiddleware], async (req, res) => {
   }
 });
 
+
+// --- RUTA PARA OBTENER LISTA DE FISIOS (Para el selector de reserva) ---
+// GET /api/auth/fisioterapeutas
+router.get('/fisioterapeutas', authMiddleware, async (req, res) => {
+  try {
+    const fisios = await Usuario.findAll({
+      where: { rol: 'fisioterapeuta' },
+      attributes: ['id', 'nombre'] // Solo necesitamos ID y Nombre
+    });
+    res.json(fisios);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: 'Error al cargar fisioterapeutas' });
+  }
+}); 
+
 module.exports = router;

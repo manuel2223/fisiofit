@@ -1,7 +1,4 @@
-/* En cliente/src/components/TarjetaRutina.css */
-
 .tarjeta-rutina {
-  /* La clase 'tarjeta' de index.css ya nos da el fondo y borde */
   margin-bottom: 2rem;
 }
 
@@ -34,7 +31,7 @@
 .ejercicio-item .nombre {
   font-weight: 600;
   font-size: 1.1rem;
-  display: block; /* Para que ocupe su propia línea */
+  display: block; 
 }
 
 .ejercicio-item .series {

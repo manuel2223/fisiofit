@@ -1,5 +1,3 @@
-// En cliente/src/utils/poseUtils.js
-
 export function calculateAngle(a, b, c) {
   const radians = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
   let angle = Math.abs(radians * 180.0 / Math.PI);
@@ -32,9 +30,7 @@ export function smoothKeypoints(currentKeypoints, previousKeypoints, alpha = 0.5
 
 
 export function calculateIncline(puntoA, puntoB) {
-  // CORREGIDO: Ahora los argumentos coinciden con las variables internas
-  // puntoA = Hombro (arriba)
-  // puntoB = Cadera (abajo)
+
   
   const dy = puntoA.y - puntoB.y; 
   const dx = puntoA.x - puntoB.x; 

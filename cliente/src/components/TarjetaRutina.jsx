@@ -1,6 +1,5 @@
-// En cliente/src/components/TarjetaRutina.jsx
 import React from 'react';
-import { Link } from 'react-router-dom'; // <-- ¡ESTA ES LA LÍNEA QUE FALTABA!
+import { Link } from 'react-router-dom';
 import './TarjetaRutina.css';
 
 function TarjetaRutina({ rutina }) {
@@ -32,7 +31,6 @@ function TarjetaRutina({ rutina }) {
               </div>
             )}
 
-            {/* ¡EL NUEVO BOTÓN QUE AÑADIMOS! */}
             {/* Solo se muestra si el ejercicio tiene reglas de postura */}
             {ejercicio.reglasPostura && (
               <Link 

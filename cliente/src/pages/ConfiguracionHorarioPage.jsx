@@ -1,4 +1,3 @@
-// En cliente/src/pages/ConfiguracionHorarioPage.jsx
 import React, { useState, useEffect } from 'react';
 import api from '../api';
 import toast from 'react-hot-toast';
@@ -35,7 +34,7 @@ function ConfiguracionHorarioPage() {
             return guardado ? { 
               ...d, 
               ...guardado, 
-              tieneDescanso: guardado.tieneDescanso ?? false // (Compatibilidad)
+              tieneDescanso: guardado.tieneDescanso ?? false 
             } : d;
           });
           setHorario(nuevoHorario);

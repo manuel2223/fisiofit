@@ -1,5 +1,3 @@
-/* En cliente/src/pages/ConfiguracionHorarioPage.css */
-
 .container-horario {
   width: 90%;
   max-width: 800px;
@@ -38,7 +36,7 @@
 }
 
 .fila-dia.inactivo {
-  opacity: 0.6; /* Desvanecer los días cerrados */
+  opacity: 0.6; 
 }
 
 .nombre-dia {
@@ -146,6 +144,6 @@ input[type="time"] {
 
 .footer-horario { margin-top: 2rem; text-align: right; }
 
-/* Switch y demás (reutilizar o mantener) */
+
 .switch-label { display: flex; gap: 0.5rem; cursor: pointer; align-items: center; }
 .switch-label input { width: 18px; height: 18px; accent-color: var(--color-principal); }

@@ -8,87 +8,83 @@ const { Op } = require('sequelize'); // Importamos 'Op' para consultas
 const EmailService = require('../../4_infrastructure/services/EmailService'); // 1. IMPORTA EL SERVICIO
 
 // GET /api/citas/disponibilidad/:fecha
-router.get('/disponibilidad/:fecha', async (req, res) => {
+router.get('/disponibilidad/:fecha', [authMiddleware], async (req, res) => {
   try {
-    const fechaStr = req.params.fecha;
-    const fechaObj = new Date(fechaStr);
-    const diaSemana = fechaObj.getDay(); 
+    const { fecha } = req.params;
+    // 1. RECUPERAMOS EL ID DE LA URL (?fisioId=2)
+    const { fisioId } = req.query; 
 
-    const reglaHorario = await Disponibilidad.findOne({
-      where: { diaSemana: diaSemana, fisioterapeutaId: 1, activo: true }
-    });
-
-    if (!reglaHorario) return res.json({ slots: [], ocupadas: [] }); // Cerrado
-
-    // --- LÓGICA DE GENERACIÓN DE SLOTS ---
-    const slotsPosibles = [];
-    
-    // Helper para convertir "HH:mm" a minutos (ej. "09:30" -> 570)
-    const toMinutes = (str) => {
-      if (!str) return 0;
-      const [h, m] = str.split(':').map(Number);
-      return h * 60 + m;
-    };
-
-    let minutosActual = toMinutes(reglaHorario.horaInicio);
-    const minutosFin = toMinutes(reglaHorario.horaFin);
-    
-    // Datos del descanso
-    const minutosInicioDescanso = reglaHorario.tieneDescanso ? toMinutes(reglaHorario.horaInicioDescanso) : -1;
-    const minutosFinDescanso = reglaHorario.tieneDescanso ? toMinutes(reglaHorario.horaFinDescanso) : -1;
-
-    const duracionCita = 30; // Duración en minutos
-    // IMPORTANTE: Intervalo entre citas. Ponlo a 30 para tener citas a las :00 y :30
-    const intervalo = 30; 
-
-    while (minutosActual + duracionCita <= minutosFin) {
-      // ¿Cae este slot dentro del descanso?
-      // Si el slot empieza DESPUÉS del inicio del descanso Y ANTES del fin del descanso... saltar
-      // O si termina DENTRO del descanso...
-      // Lógica simple: Si la hora actual está entre inicio y fin del descanso, no lo añadimos.
-      
-      const enDescanso = reglaHorario.tieneDescanso && 
-                         (minutosActual >= minutosInicioDescanso && minutosActual < minutosFinDescanso);
-
-      if (!enDescanso) {
-        const h = Math.floor(minutosActual / 60).toString().padStart(2, '0');
-        const m = (minutosActual % 60).toString().padStart(2, '0');
-        slotsPosibles.push(`${h}:${m}`);
-      }
-      
-      minutosActual += intervalo;
+    if (!fisioId) {
+      return res.status(400).json({ msg: 'Falta el ID del fisioterapeuta' });
     }
 
-    // --- BUSCAR CITAS OCUPADAS (Igual que antes) ---
-    const inicioDia = new Date(`${fechaStr}T00:00:00.000Z`);
-    const finDia = new Date(`${fechaStr}T23:59:59.999Z`);
+    const fechaObj = new Date(fecha);
+    const diaSemana = fechaObj.getDay();
+
+    // 2. BUSCAMOS LA REGLA DE *ESE* FISIO
+    const configDia = await Disponibilidad.findOne({
+      where: { 
+        diaSemana: diaSemana,
+        fisioterapeutaId: fisioId // <-- ¡EL FILTRO CLAVE!
+      }
+    });
+
+    // Si no hay regla para ESE fisio, o no está activo
+    if (!configDia || !configDia.activo) {
+      return res.json({ slots: [], ocupadas: [] });
+    }
+
+    // ... (Lógica de generación de slots igual que antes) ...
+    const slots = [];
+    const duracionCita = 30;
+    const timeToMins = (str) => { const [h, m] = str.split(':').map(Number); return h * 60 + m; };
+    const minsToTime = (mins) => { const h = Math.floor(mins / 60).toString().padStart(2, '0'); const m = (mins % 60).toString().padStart(2, '0'); return `${h}:${m}`; };
+    
+    let currentMins = timeToMins(configDia.horaInicio);
+    const endMins = timeToMins(configDia.horaFin);
+    const breakStart = configDia.tieneDescanso ? timeToMins(configDia.horaInicioDescanso) : -1;
+    const breakEnd = configDia.tieneDescanso ? timeToMins(configDia.horaFinDescanso) : -1;
+
+    while (currentMins + duracionCita <= endMins) {
+      if (configDia.tieneDescanso && currentMins >= breakStart && currentMins < breakEnd) {
+        currentMins += duracionCita;
+        continue;
+      }
+      slots.push(minsToTime(currentMins));
+      currentMins += duracionCita;
+    }
+    // -----------------------------------------------------
+
+    // 3. BUSCAR CITAS OCUPADAS DE *ESE* FISIO
+    const inicioDia = new Date(`${fecha}T00:00:00.000Z`);
+    const finDia = new Date(`${fecha}T23:59:59.999Z`);
 
     const citasOcupadas = await Cita.findAll({
       where: {
         fechaHoraInicio: { [Op.between]: [inicioDia, finDia] },
-        estado: 'confirmada'
+        estado: { [Op.not]: 'cancelada' },
+        fisioterapeutaId: fisioId // <-- ¡FILTRO CLAVE 2! Solo miramos la agenda de este fisio
       },
       attributes: ['fechaHoraInicio']
     });
 
-    const horasOcupadas = citasOcupadas.map(c => {
-      return new Date(c.fechaHoraInicio).toLocaleTimeString('es-ES', {
-        hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid'
-      });
+    const ocupadas = citasOcupadas.map(c => {
+      const d = new Date(c.fechaHoraInicio);
+      return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid' });
     });
 
-    res.json({ slots: slotsPosibles, ocupadas: horasOcupadas });
+    res.json({ slots, ocupadas });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ msg: 'Error calculando disponibilidad' });
+    console.error('Error disponibilidad:', error);
+    res.status(500).json({ msg: 'Error al calcular disponibilidad' });
   }
 });
 
 // POST /api/citas/reservar
 router.post('/reservar', [authMiddleware], async (req, res) => {
   try {
-    const { fechaHoraInicio, fechaHoraFin, motivo, tipo } = req.body;
+    const { fechaHoraInicio, fechaHoraFin, motivo, tipo, fisioId } = req.body;
     const pacienteId = req.usuario.id;
     
     // 2. Necesitamos los datos del paciente (email y nombre) para enviar el correo
@@ -98,7 +94,7 @@ router.post('/reservar', [authMiddleware], async (req, res) => {
     const nuevaCita = await Cita.create({
       /* ... tus datos ... */
       pacienteId,
-      fisioterapeutaId: 1,
+      fisioterapeutaId: fisioId,
       fechaHoraInicio: new Date(fechaHoraInicio),
       fechaHoraFin: new Date(fechaHoraFin),
       estado: 'confirmada',
@@ -235,6 +231,8 @@ router.delete('/rutinas/:id', [authMiddleware, fisioMiddleware], async (req, res
     res.status(500).json({ msg: 'Error interno al borrar.' });
   }
 });
+
+
 
 
 module.exports = router;

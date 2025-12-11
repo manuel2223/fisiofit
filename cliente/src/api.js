@@ -1,4 +1,3 @@
-// En cliente/src/api.js
 import axios from 'axios';
 
 // 1. Crea la instancia de axios
@@ -7,7 +6,6 @@ const api = axios.create({
 });
 
 // 2. Interceptor de PETICIÓN (Request)
-// (Este ya lo tenías: añade el token a cada petición)
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -21,8 +19,7 @@ api.interceptors.request.use(
   }
 );
 
-// 3. --- ¡AQUÍ ESTÁ LA NUEVA LÓGICA! ---
-//    Interceptor de RESPUESTA (Response)
+// 3. Interceptor de RESPUESTA (Response)
 api.interceptors.response.use(
   
   // (A) Si la respuesta es exitosa (2xx), no hagas nada, solo devuélvela.
@@ -37,13 +34,10 @@ api.interceptors.response.use(
       
       console.log('¡Interceptor 401 activado! Token inválido. Cerrando sesión.');
       
-      // ¡SOLUCIÓN AUTOMÁTICA!
-      // Borra el "token fantasma" del almacenamiento
       localStorage.removeItem('token');
       localStorage.removeItem('rol');
       
       // Redirige al usuario a la página de login
-      // Usamos window.location para forzar una recarga completa de la app
       window.location.href = '/login';
     }
     

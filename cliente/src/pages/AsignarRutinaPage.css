@@ -1,5 +1,3 @@
-/* En cliente/src/pages/AsignarRutinaPage.css */
-
 /* --- Contenedor Principal --- */
 .constructor-container {
   width: 90%;
@@ -79,7 +77,7 @@
   list-style: none;
   padding: 0;
   margin-top: 1rem;
-  height: 300px; /* Altura fija con scroll */
+  height: 300px;
   overflow-y: auto;
   border: 1px solid var(--color-borde);
   border-radius: 8px;
@@ -117,7 +115,7 @@
 .lista-rutina-builder {
   list-style: none;
   padding: 0;
-  height: 350px; /* Altura fija con scroll */
+  height: 350px; 
   overflow-y: auto;
 }
 .ejercicio-bloque {

@@ -1,4 +1,3 @@
-// En cliente/src/components/RutaProtegida.jsx
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate, Outlet } from 'react-router-dom';

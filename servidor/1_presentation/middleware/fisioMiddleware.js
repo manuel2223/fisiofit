@@ -1,9 +1,6 @@
-// En servidor/middleware/fisioMiddleware.js
-
-// Este middleware se ejecuta DESPUÉS de 'authMiddleware'
 module.exports = function(req, res, next) {
   try {
-    // authMiddleware ya nos ha dado 'req.usuario'
+    // Viene de authMiddleware
     if (req.usuario.rol !== 'fisioterapeuta') {
       return res.status(403).json({ msg: 'Acceso denegado. No eres fisioterapeuta.' });
     }

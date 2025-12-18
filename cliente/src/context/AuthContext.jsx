@@ -10,11 +10,11 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const tokenAlmacenado = localStorage.getItem('token');
-    const rolAlmacenado = localStorage.getItem('rol'); // <-- BUSCA EL ROL GUARDADO
+    const rolAlmacenado = localStorage.getItem('rol');
     
     if (tokenAlmacenado && rolAlmacenado) {
       setToken(tokenAlmacenado);
-      setRol(rolAlmacenado); // <-- RECUPERA EL ROL
+      setRol(rolAlmacenado); 
       setIsLoggedIn(true);
     }
     setCargando(false);
@@ -22,24 +22,23 @@ export function AuthProvider({ children }) {
 
   const login = (newToken, newRol) => {
     localStorage.setItem('token', newToken);
-    localStorage.setItem('rol', newRol); // <-- GUARDA EL ROL
+    localStorage.setItem('rol', newRol); 
     setToken(newToken);
-    setRol(newRol); // <-- ESTABLECE EL ROL
+    setRol(newRol); // ESTABLECE EL ROL
     setIsLoggedIn(true);
   };
 
   const logout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('rol'); // <-- LIMPIA EL ROL
+    localStorage.removeItem('rol'); // LIMPIA EL ROL
     setToken(null);
-    setRol(null); // <-- LIMPIA EL ROL
+    setRol(null); 
     setIsLoggedIn(false);
   };
 
-  // 6. Expone el 'rol' en el valor del contexto
   const value = {
     token,
-    rol, // <-- EXPONER ROL
+    rol, 
     isLoggedIn,
     cargando,
     login,

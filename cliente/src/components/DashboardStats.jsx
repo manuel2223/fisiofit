@@ -18,7 +18,7 @@ function DashboardStats({ stats, cargando }) {
   return (
     <div className="stats-container">
       
-      {/* --- KPIs --- */}
+      {/* KPIs */}
       <div className="kpi-grid">
         <div className="kpi-card azul">
           <h3>Citas Hoy</h3>
@@ -37,7 +37,7 @@ function DashboardStats({ stats, cargando }) {
         </div>
       </div>
 
-      {/* --- GRÁFICOS --- */}
+      {/* GRÁFICOS */}
       <div className="charts-grid">
         
         {/* Gráfico 1: Barras (Semana) */}

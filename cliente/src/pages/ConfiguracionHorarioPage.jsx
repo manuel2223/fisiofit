@@ -11,11 +11,11 @@ function ConfiguracionHorarioPage() {
     DIAS.map((nombre, index) => ({
       diaSemana: index,
       nombreDia: nombre,
-      horaInicio: '09:00',
-      horaFin: '21:00', // Por defecto hasta las 21
+      horaInicio: '09:00',// horas por defecto
+      horaFin: '21:00',
       activo: index !== 0 && index !== 6,
       
-      // Nuevos campos por defecto
+      // descansos por defecto
       tieneDescanso: true,
       horaInicioDescanso: '14:00',
       horaFinDescanso: '17:00'
@@ -76,7 +76,7 @@ function ConfiguracionHorarioPage() {
         {horario.map((dia, index) => (
           <div key={dia.diaSemana} className={`fila-dia-compleja ${dia.activo ? 'activo' : 'inactivo'}`}>
             
-            {/* 1. Cabecera del Día */}
+            {/* Día */}
             <div className="dia-header">
               <div className="nombre-dia">{dia.nombreDia}</div>
               <label className="switch-label">
@@ -89,7 +89,7 @@ function ConfiguracionHorarioPage() {
               </label>
             </div>
 
-            {/* 2. Controles de Hora (Solo si está abierto) */}
+            {/* Controles de Hora */}
             {dia.activo && (
               <div className="controles-hora">
                 <div className="bloque-hora">

@@ -1,5 +1,3 @@
-/* En cliente/src/pages/EjercicioEntrenamientoPage.css */
-
 .entrenamiento-container {
   width: 90%;
   max-width: 800px;
@@ -10,7 +8,7 @@
   color: var(--color-principal);
 }
 
-/* --- NUEVO: Contenedor de Selección --- */
+
 .mode-selector {
   display: flex;
   flex-direction: column;
@@ -21,7 +19,7 @@
   border-radius: 8px;
   margin: 1rem auto;
 }
-/* Reutilizamos el estilo del botón primario */
+
 .mode-selector .boton-primario,
 .mode-selector .boton-secundario {
   width: 100%;
@@ -29,7 +27,7 @@
   text-align: center;
   text-decoration: none;
 }
-/* Reutilizamos el estilo del botón secundario para el label */
+
 .mode-selector .boton-secundario {
   display: inline-block;
   background-color: var(--color-blanco);
@@ -47,40 +45,39 @@
 }
 
 
-/* --- CONTENEDOR DE MEDIA MODIFICADO --- */
+
 .media-container {
-  position: relative; /* Clave para superponer el canvas */
+  position: relative; 
   width: 640px;
   height: 480px;
   margin: 1rem auto;
-  background-color: #000; /* Fondo negro para las bandas */
+  background-color: #000; 
   border-radius: 8px;
   overflow: hidden;
 }
 
-/* El video AHORA ES VISIBLE */
+
 #video-feed {
   width: 100%;
   height: 100%;
-  object-fit: contain; /* Rellena el contenedor */
+  object-fit: contain; 
 }
-/* Modo espejo para la webcam */
+
 #video-feed.mirror {
   transform: scaleX(-1);
 }
 
-/* El canvas AHORA ESTÁ ENCIMA */
 #pose-canvas {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: transparent; /* Fondo transparente */
+  background-color: transparent; 
   pointer-events: none
 }
 
-/* La caja de feedback (sin cambios) */
+
 .feedback-box {
   margin-top: 1.5rem;
   padding: 1.5rem;
@@ -98,17 +95,17 @@
   min-height: 50px;
 }
 
-/* --- ESTILOS DEL MODAL DE RESUMEN (FisioFit Style) --- */
 
-/* Fondo oscuro con desenfoque (Glassmorphism sutil) */
+
+
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.6); /* Un poco más oscuro */
-  backdrop-filter: blur(5px); /* Desenfoca el fondo */
+  background-color: rgba(0, 0, 0, 0.6); 
+  backdrop-filter: blur(5px); 
   display: flex;
   justify-content: center;
   align-items: center;
@@ -116,19 +113,18 @@
   animation: fadeIn 0.3s ease-out;
 }
 
-/* La Tarjeta del Modal */
 .modal-contenido {
   background-color: var(--color-blanco);
   padding: 2rem;
-  border-radius: 16px; /* Bordes muy redondeados */
+  border-radius: 16px; 
   width: 90%;
-  max-width: 420px; /* Un poco más estrecho y elegante */
+  max-width: 420px; 
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  border-top: 6px solid var(--color-principal); /* Toque de color arriba */
-  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* Animación suave */
+  border-top: 6px solid var(--color-principal); 
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
 }
 
-/* Cabecera */
+
 .modal-header {
   text-align: center;
   margin-bottom: 1.5rem;
@@ -145,14 +141,14 @@
   gap: 0.5rem;
 }
 
-/* Inputs y Selects dentro del modal */
+
 .modal-contenido select,
 .modal-contenido textarea {
   width: 100%;
   padding: 0.8rem;
   border: 1px solid var(--color-borde);
   border-radius: 8px;
-  background-color: #F9FAFB; /* Fondo gris muy suave */
+  background-color: #F9FAFB; 
   font-family: inherit;
   transition: all 0.2s;
 }
@@ -165,11 +161,11 @@
   box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.1);
 }
 
-/* Checkbox de Dolor personalizado */
+
 .checkbox-dolor {
   width: 20px;
   height: 20px;
-  accent-color: #E53E3E; /* Rojo si hay dolor */
+  accent-color: #E53E3E; 
   cursor: pointer;
   text-align: right;
 }
@@ -185,12 +181,11 @@
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* En cliente/src/pages/FisioBibliotecaPage.css */
 
 .boton-secundario {
   background-color: transparent;
-  color: #6B7280; /* Gris medio */
-  border: 2px solid #D1D5DB; /* Borde gris suave */
+  color: #6B7280; 
+  border: 2px solid #D1D5DB; 
   padding: 12px 24px;
   font-size: 1rem;
   font-weight: 600;
@@ -202,9 +197,9 @@
 }
 
 .boton-secundario:hover {
-  border-color: #9CA3AF; /* El borde se oscurece un poco */
-  color: #374151; /* El texto se oscurece */
-  background-color: #F9FAFB; /* Fondo muy sutil */
+  border-color: #9CA3AF; 
+  color: #374151; 
+  background-color: #F9FAFB; 
 
 }
 

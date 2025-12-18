@@ -1,11 +1,9 @@
-// En cliente/src/pages/FisioBibliotecaPage.jsx
 import React, { useState, useEffect } from 'react';
 import api from '../api';
 import toast from 'react-hot-toast';
 import './FisioBibliotecaPage.css';
 
-// --- 1. CONFIGURACIÓN: DICCIONARIO DE ARTICULACIONES ---
-// Esto traduce lo que ve el fisio a lo que entiende la IA
+// diccionario de las articulaciones
 const ARTICULACIONES_DISPONIBLES = {
   rodilla_derecha: {
     label: "Pierna Derecha",
@@ -48,29 +46,29 @@ function FisioBibliotecaPage() {
   
   const [idEditando, setIdEditando] = useState(null);
   
-  // Estados del Ejercicio
+  // estados del Ejercicio
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
   const [categoria, setCategoria] = useState(''); 
   
-  // Estados de Validación Visual
+  // estados de Validación Visual
   const [erroresCampos, setErroresCampos] = useState({}); 
 
-  // Estados de Categoría
+  // estados de Categoría
   const [nuevaCategoriaNombre, setNuevaCategoriaNombre] = useState('');
 
-  // --- 2. NUEVOS ESTADOS: CONSTRUCTOR DE REGLAS IA ---
-  const [reglas, setReglas] = useState([]); // Lista de reglas del ejercicio actual
   
-  // Estados temporales para la regla que se está creando ahora mismo
+  const [reglas, setReglas] = useState([]); 
+  
+  // estados temporales default
   const [nuevaReglaArticulacion, setNuevaReglaArticulacion] = useState('rodilla_derecha');
   const [nuevaReglaMin, setNuevaReglaMin] = useState(70);
   const [nuevaReglaMax, setNuevaReglaMax] = useState(110);
   const [nuevaReglaMensaje, setNuevaReglaMensaje] = useState('Corrige la postura');
 
 
-  // --- CARGA DE DATOS ---
+  // carga de datos
   const fetchCategorias = async () => {
     try {
       const resCat = await api.get('/fisio/categorias');
@@ -106,7 +104,7 @@ function FisioBibliotecaPage() {
     cargarDatosIniciales();
   }, []);
 
-  // --- HANDLERS PRINCIPALES ---
+  // handlers
 
   const limpiarFormulario = () => {
     setIdEditando(null);
@@ -160,10 +158,10 @@ function FisioBibliotecaPage() {
     }
   };
 
-  // --- 3. HANDLERS DEL CONSTRUCTOR DE REGLAS ---
+  // constructor de reglas
 
   const addRegla = () => {
-    // Busca la config técnica en el diccionario
+    // busca la config en el diccionario
     const config = ARTICULACIONES_DISPONIBLES[nuevaReglaArticulacion];
     
     const nuevaRegla = {
@@ -184,7 +182,7 @@ function FisioBibliotecaPage() {
     setReglas(nuevas);
   };
 
-  // --- SUBMIT DEL FORMULARIO PRINCIPAL ---
+  // formulario principal
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErroresCampos({}); 
@@ -208,7 +206,7 @@ function FisioBibliotecaPage() {
       descripcion, 
       videoUrl, 
       categoriaId: categoria,
-      // Enviamos las reglas al backend
+      // enviar las reglas
       reglasPostura: reglas.length > 0 ? reglas : null 
     };
 
@@ -231,7 +229,7 @@ function FisioBibliotecaPage() {
     }
   };
 
-  // --- GESTIÓN DE CATEGORÍAS ---
+  // gestion de categorias
   const handleCategoriaSubmit = async (e) => {
     e.preventDefault();
     if (!nuevaCategoriaNombre.trim()) return;
@@ -263,7 +261,7 @@ function FisioBibliotecaPage() {
       <h2>Biblioteca de Ejercicios</h2>
       
       <div className="biblioteca-layout">
-        {/* --- Columna 1: Formulario --- */}
+        {/* Columna 1: Formulario */}
         <div className="tarjeta form-biblioteca">
           <h3>{idEditando ? 'Editar Ejercicio' : 'Añadir Nuevo Ejercicio'}</h3>
           
@@ -304,12 +302,12 @@ function FisioBibliotecaPage() {
 
             <div className="form-grupo">
               <label>URL Video (Opcional)</label>
-              <input type="text" value={videoUrl} onChange={e => setVideoUrl(e.target.value)} placeholder="https://www.youtube.com/embed/..." />
+              <input type="text" value={videoUrl} onChange={e => setVideoUrl(e.target.value)} placeholder="https://www.youtube.com/..." />
             </div>
 
             <hr style={{margin: '1.5rem 0', borderTop: '1px solid #eee'}} />
             
-            {/* --- 4. AQUÍ ESTÁ EL CONSTRUCTOR VISUAL DE REGLAS --- */}
+            
             <h4>Reglas de Corrección IA (Opcional)</h4>
             
             <div className="constructor-reglas-box">
@@ -353,7 +351,7 @@ function FisioBibliotecaPage() {
               </button>
             </div>
 
-            {/* Lista de reglas añadidas */}
+            {/* Lista de reglas */}
             {reglas.length > 0 && (
               <ul className="lista-reglas-agregadas">
                 {reglas.map((regla, index) => (
@@ -371,7 +369,7 @@ function FisioBibliotecaPage() {
             
             <hr style={{margin: '1.5rem 0', borderTop: '1px solid #eee'}} />
             
-            {/* Botones finales */}
+            
             <button type="submit" className="boton-primario">
               {idEditando ? 'Actualizar Ejercicio' : 'Guardar Ejercicio'}
             </button>

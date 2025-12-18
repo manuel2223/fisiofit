@@ -1,7 +1,6 @@
-// En servidor/4_infrastructure/services/EmailService.js
 const nodemailer = require('nodemailer');
 
-// 1. Configurar el "Transportador" (quién envía el correo)
+// el email lo envio yo desde mi cuenta 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -15,8 +14,8 @@ class EmailService {
   static async enviarConfirmacionCita(destinatario, nombrePaciente, fecha, hora, tipo) {
     try {
       const info = await transporter.sendMail({
-        from: '"FisioFit 🏥" <tu_correo_real@gmail.com>', // El remitente bonito
-        to: destinatario, // El email del paciente
+        from: '"FisioFit 🏥" <manuelsaucedogonzalez24@gmail.com>',
+        to: destinatario, // Email del paciente
         subject: '✅ Reserva Confirmada - FisioFit',
         html: `
           <div style="font-family: sans-serif; color: #333;">
@@ -35,16 +34,15 @@ class EmailService {
       console.log("Email enviado: %s", info.messageId);
     } catch (error) {
       console.error("Error enviando email:", error);
-      // No lanzamos error para no romper la reserva si falla el correo
     }
   }
 
   static async enviarAvisoFisio(nombrePaciente, fecha, hora, tipo, motivo) {
     try {
-      // Enviamos el aviso a TU correo (como si fueras el fisio)
+      // Envio el correo a mi mismo
       await transporter.sendMail({
-        from: '"Sistema FisioFit 🤖" <tu_correo_real@gmail.com>',
-        to: process.env.EMAIL_USER, // Se lo mandamos al propio fisio
+        from: '"Sistema FisioFit 🤖" <manuelsaucedogonzalez24@gmail.com@gmail.com>',
+        to: process.env.EMAIL_USER,
         subject: '📅 Nueva Cita Reservada',
         html: `
           <h3>Nueva reserva recibida</h3>
@@ -64,7 +62,7 @@ class EmailService {
   static async enviarCancelacion(destinatario, nombrePaciente, fecha, hora) {
     try {
         await transporter.sendMail({
-          from: '"FisioFit 🏥" <tu_correo_real@gmail.com>',
+          from: '"FisioFit 🏥" <manuelsaucedogonzalez24@gmail.com>',
           to: destinatario,
           subject: '❌ Cita Cancelada',
           html: `

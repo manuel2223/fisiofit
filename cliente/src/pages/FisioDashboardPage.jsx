@@ -1,23 +1,20 @@
-// En cliente/src/pages/FisioDashboardPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../api';
 import './FisioDashboardPage.css';
 
-// Importaciones del Calendario
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'moment/locale/es';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
-// Importación de los Gráficos (¡RESTOURADA!)
 import DashboardStats from '../components/DashboardStats';
 
 moment.locale('es');
 const localizer = momentLocalizer(moment);
 
 function FisioDashboardPage() {
-  // --- Estados ---
+  // Estados 
   const [pacientes, setPacientes] = useState([]);
   const [citas, setCitas] = useState([]);
   const [stats, setStats] = useState(null); // Estado para los gráficos
@@ -26,15 +23,14 @@ function FisioDashboardPage() {
   // Estados del Calendario
   const [view, setView] = useState('month');
   const [date, setDate] = useState(new Date());
-  const [citaSeleccionada, setCitaSeleccionada] = useState(null); // Para el modal
+  const [citaSeleccionada, setCitaSeleccionada] = useState(null);
 
   const navigate = useNavigate();
 
-  // --- Carga de Datos ---
+  // Carga de Datos
   useEffect(() => {
     const cargarDatos = async () => {
       try {
-        // Cargamos Pacientes, Citas y ESTADÍSTICAS
         const [resPacientes, resCitas, resStats] = await Promise.all([
           api.get('/fisio/pacientes'),
           api.get('/fisio/citas'),
@@ -44,7 +40,7 @@ function FisioDashboardPage() {
         setPacientes(resPacientes.data);
         setStats(resStats.data);
 
-        // Formateamos las citas para el calendario
+        // Formatea las citas para el calendario
         const eventos = resCitas.data.map(cita => ({
           title: `${cita.paciente ? cita.paciente.nombre : '...'} (${cita.tipo})`,
           start: new Date(cita.fechaHoraInicio),
@@ -61,7 +57,7 @@ function FisioDashboardPage() {
     cargarDatos();
   }, []);
 
-  // --- Handlers ---
+  // Handlers 
   const handleAsignarClick = (pacienteId) => {
     navigate(`/fisio/asignar/${pacienteId}`);
   };
@@ -78,10 +74,10 @@ function FisioDashboardPage() {
     <div className="dashboard-container">
       <h2>Dashboard del Fisioterapeuta</h2>
       
-      {/* 1. COMPONENTE DE ESTADÍSTICAS (Restaurado) */}
+      {/* ESTADÍSTICAS */}
       <DashboardStats stats={stats} cargando={cargando} />
 
-      {/* 2. BOTONES DE GESTIÓN */}
+  
       <div className="dashboard-actions tarjeta">
         <Link to="/fisio/biblioteca" className="boton-primario">
           📚 Biblioteca de Ejercicios
@@ -91,7 +87,7 @@ function FisioDashboardPage() {
         </Link>
       </div>
 
-      {/* 3. LAYOUT PRINCIPAL */}
+  
       <div className="dashboard-layout">
         
         {/* Columna 1: Calendario */}
@@ -156,7 +152,7 @@ function FisioDashboardPage() {
         </div>
       </div>
 
-      {/* 4. MODAL DE DETALLES DE CITA */}
+      
       {citaSeleccionada && (
         <div className="modal-overlay" onClick={cerrarModal}>
           <div className="modal-contenido" onClick={(e) => e.stopPropagation()}>

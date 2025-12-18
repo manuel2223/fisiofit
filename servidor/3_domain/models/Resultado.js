@@ -1,4 +1,3 @@
-// En servidor/3_domain/models/Resultado.js
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../../4_infrastructure/database/db');
 
@@ -15,7 +14,7 @@ Resultado.init({
     allowNull: false
   },
   dolor: {
-    type: DataTypes.BOOLEAN, // ¿Sintió dolor?
+    type: DataTypes.BOOLEAN,
     defaultValue: false
   },
   comentarios: {
@@ -26,7 +25,6 @@ Resultado.init({
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW
   }
-  // Las claves foráneas (pacienteId, ejercicioId) se añaden en index.js
 }, {
   sequelize,
   modelName: 'Resultado'

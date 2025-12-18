@@ -1,7 +1,5 @@
-// En cliente/src/pages/HomePage.jsx
 import React from 'react';
 
-// Estilos que estaban en App.jsx, ahora son locales de esta página
 const styles = {
   container: {
     width: '90%',
@@ -49,7 +47,7 @@ function HomePage() {
         </a>
       </header>
 
-      {/* Sección Servicios */}
+      
       <section style={styles.servicios}>
         <h2>Cómo podemos ayudarte</h2>
         <div style={styles.serviciosGrid}>

@@ -36,15 +36,15 @@ const styles = {
 
 
 function Navbar() {
-  // 1. Traemos el estado (isLoggedIn) y el (rol) del contexto
+  // Traemos el estado y el del contexto
   const { isLoggedIn, rol } = useAuth();
 
   return (
     <nav style={styles.navbar}>
-      {/* --- SECCIÓN IZQUIERDA (Logo) --- */}
+      {/* SECCIÓN IZQUIERDA (Logo) */}
       <Link to="/" style={styles.navLogo}><img src={logoFisioFit} alt="Logo FisioFit" style={styles.logoImage} /></Link>
       
-      {/* --- SECCIÓN CENTRAL (Navegación principal) --- */}
+      {/* SECCIÓN CENTRAL (principal) */}
       <div style={styles.navLinks}>
         <Link to="/" style={styles.navLink}>Inicio</Link>
         
@@ -62,16 +62,14 @@ function Navbar() {
         )}
       </div>
 
-      {/* --- SECCIÓN DERECHA (Login/Mi Cuenta) --- */}
+      {/* SECCIÓN DERECHA (Login/Mi Cuenta) */}
       <div style={styles.navLinks}>
         {isLoggedIn ? (
-          // Si está logueado, muestra "Mi Cuenta"
-          <>
+          // Si está logueado, muestra Mi Cuenta
             <Link to="/mi-cuenta" style={styles.navLink}>Mi Cuenta</Link>
-          </>
         ) : (
-          // Si no, muestra "Login"
-          <Link to="/login" style={styles.navLink}>Login</Link>
+          // Si no, muestra Login
+          <Link to="/login" style={styles.navLink}>Iniciar Sesión</Link>
         )}
       </div>
     </nav>

@@ -13,7 +13,7 @@ const styles = {
 function Footer() {
   return (
     <footer style={styles.footer}>
-      <p>&copy; {new Date().getFullYear()} FisioApp. Todos los derechos reservados.</p>
+      <p>&copy; {new Date().getFullYear()} FisioFit. Todos los derechos reservados.</p>
     </footer>
   );
 }

@@ -21,7 +21,7 @@ Ejercicio.init({
     type: DataTypes.STRING,
     allowNull: true,
     validate: {
-      isUrl: true // Validación de que es una URL
+      isUrl: true 
     }
   },
   series: {
@@ -32,12 +32,10 @@ Ejercicio.init({
     type: DataTypes.INTEGER,
     allowNull: true
   },
-
   reglasPostura: {
     type: DataTypes.JSON,
     allowNull: true
   }
-  // La clave foránea (rutinaId) se añade en el Paso 2
 }, {
   sequelize,
   modelName: 'Ejercicio'

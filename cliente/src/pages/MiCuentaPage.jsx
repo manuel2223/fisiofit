@@ -1,4 +1,3 @@
-// En cliente/src/pages/MiCuentaPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -18,7 +17,7 @@ function MiCuentaPage() {
   const [citas, setCitas] = useState([]);
   const [cargando, setCargando] = useState(true);
   
-  // 1. NUEVO: Estado para errores visuales
+  // Estado para errores 
   const [erroresCampos, setErroresCampos] = useState({});
 
   useEffect(() => {
@@ -44,9 +43,9 @@ function MiCuentaPage() {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    setErroresCampos({}); // Reinicia errores visuales
+    setErroresCampos({}); 
 
-    // --- 2. VALIDACIÓN VISUAL MANUAL ---
+    // validación
     const nuevosErrores = {};
     let hayError = false;
 
@@ -60,30 +59,27 @@ function MiCuentaPage() {
       hayError = true;
     }
 
-    // Validar contraseñas (solo si escribe algo)
+    // Validar contraseñas 
     if (password) {
       if (password !== password2) {
         nuevosErrores.password = true;
         nuevosErrores.password2 = true;
-        toast.error('Las contraseñas no coinciden.'); // Mensaje específico
+        toast.error('Las contraseñas no coinciden.'); 
         hayError = true;
       } else if (password.length < 6) {
         nuevosErrores.password = true;
-        toast.error('La contraseña debe tener al menos 6 caracteres.'); // Mensaje específico
+        toast.error('La contraseña debe tener al menos 6 caracteres.');
         hayError = true;
       }
     }
 
-    // Si hay cualquier error, paramos aquí
     if (hayError) {
       setErroresCampos(nuevosErrores);
-      // Solo mostramos el genérico si no hemos mostrado uno específico de password
       if (!nuevosErrores.password) {
         toast.error('Por favor, revisa los campos marcados en rojo.');
       }
       return;
     }
-    // -----------------------------------
 
     const toastId = toast.loading('Actualizando perfil...');
 
@@ -154,7 +150,7 @@ function MiCuentaPage() {
 
   return (
     <div className="mi-cuenta-container">
-      {/* --- COLUMNA 1: EDITAR DATOS --- */}
+      
       <div className="mi-cuenta-tarjeta tarjeta">
         <h2>Editar Mis Datos</h2>
         
@@ -165,13 +161,12 @@ function MiCuentaPage() {
               type="text" 
               id="nombre" 
               value={nombre} 
-              // 3. CLASE CONDICIONAL Y LIMPIEZA DE ERROR
               className={erroresCampos.nombre ? 'input-error' : ''}
               onChange={e => {
                 setNombre(e.target.value);
                 if(erroresCampos.nombre) setErroresCampos({...erroresCampos, nombre: false});
               }} 
-              // Quitamos required para que salte nuestra validación visual
+              
             />
           </div>
           <div className="form-grupo">
@@ -225,7 +220,7 @@ function MiCuentaPage() {
         </button>
       </div>
 
-      {/* --- COLUMNA 2: MIS CITAS (Sin cambios) --- */}
+      
       <div className="mis-citas-tarjeta tarjeta">
         <h2>Mis Citas</h2>
         {citas.length === 0 ? (
@@ -241,7 +236,7 @@ function MiCuentaPage() {
               <li key={cita.id} className="cita-item">
                 <span className="cita-fecha">
                   {new Date(cita.fechaHoraInicio).toLocaleDateString('es-ES', { 
-                    weekday: 'long', day: 'numeric', month: 'long' 
+                    weekday: 'long', day: 'numeric', month: 'long' , year: 'numeric'
                   })}
                 </span>
                 <span className="cita-hora">

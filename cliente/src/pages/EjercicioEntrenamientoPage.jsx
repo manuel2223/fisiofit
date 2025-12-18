@@ -1,10 +1,9 @@
-// En cliente/src/pages/EjercicioEntrenamientoPage.jsx
 import React, { useRef, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
 import toast from 'react-hot-toast';
 
-// --- Importaciones de TensorFlow ---
+// Importaciones de TensorFlow 
 import * as tf from '@tensorflow/tfjs';
 import * as poseDetection from '@tensorflow-models/pose-detection';
 import '@tensorflow/tfjs-backend-webgl';
@@ -27,16 +26,15 @@ function EjercicioEntrenamientoPage() {
   const [cargando, setCargando] = useState(true);
   const [mensajeCarga, setMensajeCarga] = useState('Cargando...');
   const [ejercicio, setEjercicio] = useState(null);
-  const [feedback, setFeedback] = useState('Selecciona una fuente de video');
+  const [feedback, setFeedback] = useState('Selecciona la fuente de video');
   const [mode, setMode] = useState('select'); 
 
-  // Estados para el Modal
   const [mostrarModal, setMostrarModal] = useState(false);
   const [dificultad, setDificultad] = useState('Normal');
   const [dolor, setDolor] = useState(false);
   const [comentarios, setComentarios] = useState('');
 
-  // 1. INICIALIZACIÓN
+  // INICIALIZACIÓN
   useEffect(() => {
     const setupDetector = async () => {
       try {
@@ -52,7 +50,7 @@ function EjercicioEntrenamientoPage() {
         const detectorConfig = { runtime: 'tfjs', modelType: 'full' }; 
         detectorRef.current = await poseDetection.createDetector(model, detectorConfig);
 
-        setMensajeCarga('¡Listo!');
+        setMensajeCarga('Listo!');
         setCargando(false);
       } catch (err) {
         console.error(err);
@@ -70,7 +68,7 @@ function EjercicioEntrenamientoPage() {
     };
   }, [ejercicioId]);
 
-  // 2. BUCLE IA (CEREBRO)
+  // BUCLE IA 
   const poseLoop = async () => {
     if (detectorRef.current && videoRef.current && canvasRef.current) {
       if (videoRef.current.readyState < 2) {
@@ -88,7 +86,7 @@ function EjercicioEntrenamientoPage() {
       if (poses.length > 0 && ejercicio && ejercicio.reglasPostura) {
         const pose = poses[0];
         
-        // Lado Dominante
+        // lado dominante
         const leftPoints = ['left_shoulder', 'left_hip', 'left_knee', 'left_ankle'];
         const rightPoints = ['right_shoulder', 'right_hip', 'right_knee', 'right_ankle'];
         let scoreLeft = 0; let scoreRight = 0;
@@ -103,7 +101,7 @@ function EjercicioEntrenamientoPage() {
           if (ignoreLeft && regla.articulacion.includes('izquierda')) return;
           if (ignoreRight && regla.articulacion.includes('derecha')) return;
 
-          // CASO ESPALDA
+          // caso espalda
           if (regla.articulacion.includes('espalda') || regla.articulacion.includes('inclinacion')) {
              const p1 = pose.keypoints.find(k => k.name === regla.puntos[0]);
              const p2 = pose.keypoints.find(k => k.name === regla.puntos[1]);
@@ -113,7 +111,7 @@ function EjercicioEntrenamientoPage() {
                 const [min, max] = regla.rangoCorrecto;
                 
                 p2.anguloCalculado = Math.round(inclinacion);
-                // Guardamos puntos para dibujar la línea amarilla
+                // puntos para dibujar la línea amarilla
                 regla.puntosActivos = [p1.name, p2.name, 'vertical']; 
 
                 if (inclinacion < min || inclinacion > max) {
@@ -124,7 +122,7 @@ function EjercicioEntrenamientoPage() {
              return;
           }
 
-          // CASO NORMAL
+          // caso normal
           const p1 = pose.keypoints.find(k => k.name === regla.puntos[0]);
           const p2 = pose.keypoints.find(k => k.name === regla.puntos[1]);
           const p3 = pose.keypoints.find(k => k.name === regla.puntos[2]);
@@ -156,7 +154,7 @@ function EjercicioEntrenamientoPage() {
     loopRef.current = requestAnimationFrame(poseLoop);
   };
 
-  // --- FUNCIÓN AUXILIAR PARA DIBUJAR EL CONO ---
+  // FUNCIÓN DIBUJAR CONO
   const drawArcGuide = (ctx, center, baseAngle, range, isClockwise) => {
     const radius = 100;
     const [minDeg, maxDeg] = range;
@@ -191,14 +189,14 @@ function EjercicioEntrenamientoPage() {
     ctx.restore();
   };
 
-  // 3. DIBUJO
+  // DIBUJO
   const drawCanvas = (poses, ctx, feedbackVisual) => {
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
     if (poses.length > 0) {
       const pose = poses[0];
 
-      // --- ESCALADO ---
+      // escalado
       const canvasWidth = canvasRef.current.width;
       const canvasHeight = canvasRef.current.height;
       const videoWidth = videoRef.current.videoWidth;
@@ -219,13 +217,13 @@ function EjercicioEntrenamientoPage() {
         offsetX = (canvasWidth - videoWidth * scale) / 2;
       }
       
-      // Función para transformar coordenadas
+      // función para transformar coordenadas
       const toCanvasCoords = (kp) => ({
         x: kp.x * scale + offsetX,
         y: kp.y * scale + offsetY
       });
 
-      // --- 1. DIBUJAR GUÍAS AR (El Cono Amarillo) ---
+      // dibujar cono amarillo
       if (ejercicio && ejercicio.reglasPostura) {
          ejercicio.reglasPostura.forEach(regla => {
             if (regla.puntosActivos) {
@@ -236,7 +234,7 @@ function EjercicioEntrenamientoPage() {
                const kp1 = pose.keypoints.find(k => k.name === p1Name);
                const kp2 = pose.keypoints.find(k => k.name === p2Name);
                
-               // Caso Espalda (Vertical)
+               // Caso Espalda
                if (p3Name === 'vertical' && kp1 && kp2) {
                   const center = toCanvasCoords(kp2);
                   drawArcGuide(ctx, center, -Math.PI / 2, regla.rangoCorrecto, true);
@@ -260,7 +258,7 @@ function EjercicioEntrenamientoPage() {
          });
       }
 
-      // --- 2. DIBUJAR ESQUELETO ---
+      // dibujar esqueleto
       const colorEsqueleto = feedbackVisual.esCorrecto ? '#00FF00' : '#FF0000';
       
       ctx.lineWidth = 6;
@@ -268,7 +266,7 @@ function EjercicioEntrenamientoPage() {
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
-      // Resaltar segmentos activos
+      // resaltar segmentos activos
       if (ejercicio && ejercicio.reglasPostura) {
          ejercicio.reglasPostura.forEach(regla => {
             if (regla.puntosActivos) {
@@ -299,7 +297,7 @@ function EjercicioEntrenamientoPage() {
          });
       }
 
-      // --- 3. DIBUJAR PUNTOS Y TEXTO ---
+      // dibujar puntos
       ctx.fillStyle = colorEsqueleto;
       for (let kp of pose.keypoints) {
         if (kp.score > 0.5) {
@@ -317,17 +315,16 @@ function EjercicioEntrenamientoPage() {
              ctx.fillText(kp.anguloCalculado + "°", c.x, c.y - 20);
              ctx.fillStyle = colorEsqueleto; 
           } else {
-             // Puntos normales más pequeños (blancos)
              ctx.fillStyle = 'white';
              ctx.beginPath(); ctx.arc(c.x, c.y, 4, 0, 2 * Math.PI); ctx.fill();
-             ctx.fillStyle = colorEsqueleto; // Restaurar
+             ctx.fillStyle = colorEsqueleto; 
           }
         }
       }
     }
   };
 
-  // 4. CONTROLES (Iguales)
+  // CONTROLES 
   const startWebcam = async () => {
     try {
       setFeedback('Accediendo a la cámara...');
@@ -373,7 +370,7 @@ function EjercicioEntrenamientoPage() {
     }
   };
 
-  // 5. FEEDBACK Y GUARDADO
+  // FEEDBACK Y GUARDADO
   const handleTerminar = () => {
     if (loopRef.current) cancelAnimationFrame(loopRef.current);
     if (videoRef.current) videoRef.current.pause();
@@ -404,9 +401,9 @@ function EjercicioEntrenamientoPage() {
       {mode === 'select' && (
         <div className="mode-selector">
           <button className="boton-primario" onClick={startWebcam}>Usar Webcam</button>
-          <p>--- o ---</p>
+          {/*<p>--- o ---</p>
           <input type="file" id="upload-video" accept="video/*" onChange={handleFileUpload} style={{display:'none'}} />
-          <label htmlFor="upload-video" className="boton-secundario">Subir Video</label>
+          <label htmlFor="upload-video" className="boton-secundario">Subir Video</label>*/}
         </div>
       )}
       <div className="media-container" style={{ display: mode === 'select' ? 'none' : 'block' }}>

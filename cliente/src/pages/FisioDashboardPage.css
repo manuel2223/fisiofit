@@ -1,8 +1,3 @@
-/* En cliente/src/pages/FisioDashboardPage.css */
-
-
-
-
 .dashboard-container {
   width: 90%;
   max-width: 900px;
@@ -52,11 +47,10 @@
 }
 
 .boton-asignar {
-  /* Usamos el estilo del botón primario */
   background-color: var(--color-acento);
   color: var(--color-texto);
   border: none;
-  padding: 8px 16px; /* Un poco más pequeño */
+  padding: 8px 16px;
   font-size: 0.9rem;
   font-weight: 600;
   border-radius: 8px;
@@ -70,7 +64,7 @@
 
 .dashboard-container {
   width: 90%;
-  max-width: 1400px; /* Más ancho para el calendario */
+  max-width: 1400px;
   margin: 2rem auto;
 }
 
@@ -80,7 +74,6 @@
   margin-bottom: 2rem;
 }
 
-/* --- NUEVO: Layout de dos columnas --- */
 .dashboard-layout {
   display: flex;
   flex-wrap: wrap;
@@ -88,39 +81,36 @@
 }
 
 .columna-calendario {
-  flex: 2; /* Que el calendario ocupe 2/3 */
+  flex: 2; 
   min-width: 400px;
 }
 
 .columna-pacientes {
-  flex: 1; /* Que la lista ocupe 1/3 */
+  flex: 1; 
   min-width: 300px;
 }
-/* --- Fin de Layout --- */
+
 
 
 .dashboard-widget {
   padding: 2rem;
-  margin-bottom: 2rem; /* Añadimos esto por si no usamos el layout */
+  margin-bottom: 2rem;
 }
 
-
-/* El fondo oscuro semitransparente */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Negro al 50% */
+  background-color: rgba(0, 0, 0, 0.5); 
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Asegura que esté por encima de todo */
-  backdrop-filter: blur(3px); /* Efecto borroso de fondo (opcional) */
+  z-index: 1000;
+  backdrop-filter: blur(3px); 
 }
 
-/* La caja blanca del contenido */
 .modal-contenido {
   background-color: white;
   padding: 2rem;
@@ -136,7 +126,6 @@
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* Cabecera del modal */
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -161,7 +150,6 @@
   color: #000;
 }
 
-/* Cuerpo del modal */
 .modal-body p {
   margin-bottom: 0.8rem;
   font-size: 1.05rem;
@@ -183,7 +171,6 @@
   color: #555;
 }
 
-/* Pie del modal */
 .modal-footer {
   margin-top: 2rem;
   text-align: right;
@@ -191,8 +178,8 @@
 
 .modal-footer .boton-secundario {
   background-color: transparent;
-  color: #555; /* Gris oscuro para el texto */
-  border: 1px solid #ccc; /* Borde gris suave */
+  color: #555; 
+  border: 1px solid #ccc; 
   padding: 10px 24px;
   font-size: 1rem;
   font-weight: 600;
@@ -202,41 +189,35 @@
 }
 
 .modal-footer .boton-secundario:hover {
-  background-color: #f3f4f6; /* Un gris muy clarito al pasar el ratón */
-  border-color: #999; /* El borde se oscurece un poco */
-  color: #333; /* El texto se oscurece */
+  background-color: #f3f4f6; 
+  border-color: #999; 
+  color: #333; 
 
 }
 
 .modal-footer .boton-secundario:active {
-  transform: translateY(0); /* Vuelve a bajar al hacer clic */
+  transform: translateY(0);
   background-color: #e5e7eb;
 }
 
 .dashboard-actions {
   margin-bottom: 2rem;
-  padding: 2rem; /* Más espacio interior (padding) */
-
-
-  
-  /* Flexbox para centrar y espaciar */
+  padding: 2rem;
   display: flex;
-  justify-content: center; /* Centra horizontalmente */
-  align-items: center;     /* Centra verticalmente */
-  gap: 2rem;               /* Espacio entre los botones */
-  flex-wrap: wrap;         /* Permite que bajen de línea si la pantalla es pequeña */
-  
+  justify-content: center; 
+  align-items: center;     
+  gap: 2rem;             
+  flex-wrap: wrap;        
 }
 
-/* Hacemos que los botones tengan un ancho mínimo para verse uniformes */
+
 .dashboard-actions .boton-primario,
 .dashboard-actions .boton-secundario {
-    margin: 0 !important; /* Elimina cualquier margen heredado de otras páginas */
+  margin: 0 !important; 
   align-self: center;
-  
-  flex: 0 1 300px; /* No crecer más de 300px, pero encoger si hace falta */
+  flex: 0 1 300px; 
   text-align: center;
-  display: flex;          /* Para centrar icono y texto dentro del botón */
+  display: flex;       
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
@@ -247,4 +228,4 @@
   border: 2px solid transparent !important; 
 }
 
-/* (Opcional) Aseguramos que el secundario tenga su borde visible */
+

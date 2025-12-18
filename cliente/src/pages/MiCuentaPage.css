@@ -1,16 +1,12 @@
-/* En cliente/src/pages/MiCuentaPage.css */
-
-/* 1. Cambiamos el contenedor a un layout de 2 columnas */
 .mi-cuenta-container {
   width: 90%;
-  max-width: 1200px; /* Más ancho */
+  max-width: 1200px;
   margin: 2rem auto;
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Dos columnas */
+  grid-template-columns: 1fr 1fr;
   gap: 2rem;
 }
 
-/* 2. Estilos para la tarjeta de formulario */
 .mi-cuenta-tarjeta {
   width: 100%;
   padding: 2rem;
@@ -22,7 +18,6 @@
   margin-bottom: 2rem;
 }
 
-/* (Reutilizamos los estilos de .form-grupo de otros CSS) */
 .form-grupo {
   margin-bottom: 1.5rem;
 }
@@ -50,13 +45,12 @@
   cursor: pointer;
   transition: background-color 0.3s ease;
   width: 100%;
-  margin-top: 1rem; /* Espacio entre botones */
+  margin-top: 1rem; 
 }
 .boton-logout:hover {
   background-color: #C53030;
 }
 
-/* Mensajes de feedback */
 .error-mensaje {
   color: #D8000C;
   background-color: #FFD2D2;
@@ -75,7 +69,7 @@
 }
 
 
-/* --- 3. NUEVOS ESTILOS PARA LA LISTA DE CITAS --- */
+
 .mis-citas-tarjeta {
   width: 100%;
   padding: 2rem;
@@ -130,18 +124,17 @@
   text-transform: capitalize;
 }
 .cita-estado.confirmada {
-  color: #28a745; /* Verde */
+  color: #28a745; 
 }
 .cita-estado.pendiente {
-  color: #ffc107; /* Amarillo */
+  color: #ffc107; 
 }
 
 
-/* 2. NUEVO ESTILO para el botón de cancelar */
+
 .boton-cancelar-cita {
-  grid-column: 1 / -1; /* Ocupa todo el ancho */
-  grid-row: 3; /* Ponlo en la tercera fila */
-  
+  grid-column: 1 / -1; 
+  grid-row: 3; 
   background-color: transparent;
   color: #E53E3E; /* Rojo */
   border: 1px solid #E53E3E;
@@ -150,7 +143,7 @@
   font-weight: 500;
   border-radius: 8px;
   cursor: pointer;
-  margin-top: 0.75rem; /* Espacio superior */
+  margin-top: 0.75rem; 
   transition: all 0.2s ease;
 }
 
@@ -159,8 +152,6 @@
   color: white;
 }
 
-
-/* Clase para inputs con error */
 .input-error {
   border: 2px solid #E53E3E !important;
   background-color: #FFF5F5;

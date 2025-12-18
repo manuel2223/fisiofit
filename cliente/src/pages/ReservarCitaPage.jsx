@@ -1,4 +1,3 @@
-// En cliente/src/pages/ReservarCitaPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Calendar from 'react-calendar';
@@ -16,10 +15,8 @@ const TIPOS_CITA = [
 ];
 
 function ReservarCitaPage() {
-  // --- ESTADOS ---
   const [fechaSeleccionada, setFechaSeleccionada] = useState(new Date());
   
-  // 1. NUEVO: Estados para gestionar los fisios
   const [listaFisios, setListaFisios] = useState([]);
   const [fisioSeleccionado, setFisioSeleccionado] = useState(''); 
 
@@ -33,7 +30,7 @@ function ReservarCitaPage() {
   const [cargandoHoras, setCargandoHoras] = useState(false);
   const navigate = useNavigate();
 
-  // --- HELPERS ---
+  // Desabilitar dias de la semana(findes)
   const deshabilitarFinesDeSemana = ({ date, view }) => {
     if (view === 'month') {
       return date.getDay() === 0 || date.getDay() === 6;
@@ -41,12 +38,11 @@ function ReservarCitaPage() {
     return false;
   };
 
-  // --- EFECTO 1: Cargar la lista de Fisios al entrar ---
+  // Cargar la lista de Fisios
   useEffect(() => {
     api.get('/auth/fisioterapeutas')
       .then(res => {
         setListaFisios(res.data);
-        // Selecciona el primero por defecto para que cargue el calendario
         if (res.data.length > 0) {
           setFisioSeleccionado(res.data[0].id);
         }
@@ -54,9 +50,8 @@ function ReservarCitaPage() {
       .catch(err => console.error("Error cargando fisios", err));
   }, []);
 
-  // --- EFECTO 2: Cargar Disponibilidad (Depende de Fecha Y Fisio) ---
+  // Cargar Disponibilidad 
   useEffect(() => {
-    // Si no hay fisio seleccionado (aún cargando), no llamamos a la API
     if (!fisioSeleccionado) return;
 
     setHoraSeleccionada(null);
@@ -69,7 +64,7 @@ function ReservarCitaPage() {
     const dia = String(fechaSeleccionada.getDate()).padStart(2, '0');
     const fechaFormatoAPI = `${anio}-${mes}-${dia}`;
 
-    // 2. ¡AQUÍ ESTABA EL ERROR! Ahora enviamos el fisioId
+    // Enviamos el fisioId
     api.get(`/citas/disponibilidad/${fechaFormatoAPI}?fisioId=${fisioSeleccionado}`)
       .then(respuesta => {
         setSlotsDisponibles(respuesta.data.slots || []);
@@ -81,9 +76,9 @@ function ReservarCitaPage() {
       })
       .finally(() => setCargandoHoras(false));
 
-  }, [fechaSeleccionada, fisioSeleccionado]); // Se ejecuta si cambia la fecha O el fisio
+  }, [fechaSeleccionada, fisioSeleccionado]); 
 
-  // --- HANDLERS ---
+  // handlers
   const handleConfirmarReserva = async () => {
     if (!horaSeleccionada) {
       toast.error("Por favor, selecciona una hora.");
@@ -98,7 +93,6 @@ function ReservarCitaPage() {
       fechaHoraInicio.setHours(hora, minuto, 0, 0);
       const fechaHoraFin = new Date(fechaHoraInicio.getTime() + 30 * 60000);
 
-      // 3. Enviamos el fisioId también al reservar
       await api.post('/citas/reservar', { 
         fechaHoraInicio: fechaHoraInicio.toISOString(),
         fechaHoraFin: fechaHoraFin.toISOString(),
@@ -116,17 +110,16 @@ function ReservarCitaPage() {
       toast.error(msg, { id: toastId });
     }
   };
-
-  // --- RENDER ---
+ 
   return (
     <div className="container-reserva">
       <h2>Reserva tu Cita</h2>
       
       <div className="reserva-layout">
-        {/* COLUMNA 1: CALENDARIO */}
+        
         <div className="calendario-container">
           
-          {/* 4. NUEVO: Selector de Profesional */}
+          
           <div className="form-grupo" style={{marginBottom: '1.5rem'}}>
             <label style={{fontWeight:'bold', marginBottom:'0.5rem', display:'block'}}>Elige Profesional:</label>
             <select 
@@ -148,7 +141,7 @@ function ReservarCitaPage() {
           />
         </div>
 
-        {/* COLUMNA 2: DETALLES Y HORAS */}
+        
         <div className="horas-container">
           <h3>Detalles de la Cita</h3>
           <p className="fecha-texto">

@@ -1,4 +1,3 @@
-// En cliente/src/pages/RegistroPage.jsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -20,7 +19,7 @@ function RegistroPage() {
     e.preventDefault();
     setErroresCampos({});
 
-    // --- VALIDACIÓN VISUAL ---
+    // validación
     const nuevosErrores = {};
     let hayError = false;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -40,7 +39,7 @@ function RegistroPage() {
     if (!password) { nuevosErrores.password = true; hayError = true; }
     if (!password2) { nuevosErrores.password2 = true; hayError = true; }
 
-    // Validaciones específicas de contraseña
+    // Validaciones de contraseña
     if (password && password !== password2) {
       nuevosErrores.password = true;
       nuevosErrores.password2 = true;
@@ -54,13 +53,11 @@ function RegistroPage() {
 
     if (hayError) {
       setErroresCampos(nuevosErrores);
-      // Si no hay mensaje específico (email o pass), mostrar genérico
       if (!nuevosErrores.email && !nuevosErrores.password) {
          toast.error('Por favor, revisa los campos marcados.');
       }
       return;
     }
-    // ------------------------
 
     const toastId = toast.loading('Creando cuenta...');
 

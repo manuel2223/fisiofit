@@ -1,5 +1,3 @@
-/* En cliente/src/pages/RegistroPage.css */
-
 .registro-container {
   display: flex;
   justify-content: center;
@@ -9,7 +7,7 @@
 
 .registro-form {
   width: 100%;
-  max-width: 500px; /* Un poco más ancho que el login */
+  max-width: 500px; 
   padding: 2rem;
 }
 
@@ -39,7 +37,7 @@
   border-radius: 8px;
 }
 
-/* Estilos para los botones de radio (rol) */
+
 .opciones-rol {
   display: flex;
   gap: 1.5rem;
@@ -53,10 +51,10 @@
 }
 
 .opciones-rol input[type="radio"] {
-  accent-color: var(--color-principal); /* Pinta el radio-button de nuestro color */
+  accent-color: var(--color-principal); 
 }
 
-/* Botón y enlace */
+
 .registro-form .boton-primario {
   width: 100%;
   margin-top: 1rem;
@@ -74,7 +72,7 @@
   text-decoration: none;
 }
 
-/* Mensaje de error */
+
 .error-mensaje {
   color: #D8000C;
   background-color: #FFD2D2;

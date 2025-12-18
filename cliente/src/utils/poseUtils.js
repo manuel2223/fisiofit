@@ -21,7 +21,6 @@ export function smoothKeypoints(currentKeypoints, previousKeypoints, alpha = 0.5
         ...keypoint,
         x: (keypoint.x * alpha) + (prev.x * (1 - alpha)),
         y: (keypoint.y * alpha) + (prev.y * (1 - alpha))
-        // Nota: No suavizamos el 'score' (confianza), usamos el nuevo
       };
     }
     return keypoint;
@@ -30,8 +29,6 @@ export function smoothKeypoints(currentKeypoints, previousKeypoints, alpha = 0.5
 
 
 export function calculateIncline(puntoA, puntoB) {
-
-  
   const dy = puntoA.y - puntoB.y; 
   const dx = puntoA.x - puntoB.x; 
 

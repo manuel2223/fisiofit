@@ -9,7 +9,7 @@ function RutaProtegidaFisio() {
     return <div>Cargando...</div>; 
   }
 
-  // 1. Comprueba si está logueado Y si es fisio
+  // Comprueba si está logueado Y si es fisio
   if (isLoggedIn && rol === 'fisioterapeuta') {
     return <Outlet />; // Si es fisio, le dejamos pasar
   }
@@ -18,7 +18,7 @@ function RutaProtegidaFisio() {
     return <Navigate to="/" replace />; // Si es paciente, lo echamos al inicio
   }
   
-  // 3. Si no está logueado
+  // Si no está logueado
   return <Navigate to="/login" replace />;
 }
 

@@ -1,8 +1,5 @@
-// En servidor/1_presentation/routes/fisio.js
 const express = require('express');
 const router = express.Router();
-
-// --- 1. IMPORTACIONES CORRECTAS ---
 const authMiddleware = require('../middleware/authMiddleware');
 const fisioMiddleware = require('../middleware/fisioMiddleware');
 const AsignarRutinaUseCase = require('../../2_application/use_cases/AsignarRutinaUseCase');
@@ -10,7 +7,7 @@ const { Usuario, Rutina, Ejercicio, Cita, EjercicioBiblioteca, Categoria, Result
 const sequelize = require('../../4_infrastructure/database/db');
 const { Op } = require('sequelize');
 
-// --- 2. RUTAS DE PACIENTES (GET) ---
+// GET /api/fisio/paciente
 router.get('/pacientes', [authMiddleware, fisioMiddleware], async (req, res) => {
   try {
     const pacientes = await Usuario.findAll({
@@ -24,10 +21,9 @@ router.get('/pacientes', [authMiddleware, fisioMiddleware], async (req, res) => 
   }
 });
 
-// 2. Ruta GET /paciente/:id
+// GET /api/fisio/paciente/:id
 router.get('/paciente/:id', [authMiddleware, fisioMiddleware], async (req, res) => {
   try {
-    // Esta línea fallaba si 'Usuario' no estaba bien importado arriba
     const paciente = await Usuario.findOne({ 
       where: { id: req.params.id, rol: 'paciente' },
       attributes: ['id', 'nombre', 'email']
@@ -44,7 +40,8 @@ router.get('/paciente/:id', [authMiddleware, fisioMiddleware], async (req, res) 
     res.status(500).json({ msg: 'Error interno del servidor.' });
   }
 });
-// --- 3. RUTA DE ASIGNAR RUTINA (POST) ---
+
+// POST /api/fisio/rutinas
 router.post('/rutinas', [authMiddleware, fisioMiddleware], async (req, res) => {
   try {
     const command = {
@@ -56,12 +53,12 @@ router.post('/rutinas', [authMiddleware, fisioMiddleware], async (req, res) => {
     const nuevaRutina = await AsignarRutinaUseCase.execute(command);
     res.status(201).json({ msg: 'Rutina creada y asignada exitosamente.', rutina: nuevaRutina });
   } catch (error) {
-    console.error('--- ERROR DETECTADO AL ASIGNAR RUTINA ---', error);
+    console.error('ERROR DETECTADO AL ASIGNAR RUTINA', error);
     res.status(400).json({ msg: error.message || 'Error en el caso de uso.' });
   }
 });
 
-// --- 4. RUTA DE CITAS DEL FISIO (GET) ---
+// GET /api/fisio/citas
 router.get('/citas', [authMiddleware, fisioMiddleware], async (req, res) => {
   try {
     const citas = await Cita.findAll({
@@ -75,16 +72,15 @@ router.get('/citas', [authMiddleware, fisioMiddleware], async (req, res) => {
   }
 });
 
-// --- 5. RUTAS CRUD DE BIBLIOTECA (GET, POST, PUT, DELETE) ---
 
-// GET /api/fisio/biblioteca (Arregla el ORDER BY)
+// RUTAS PARA LA BIBLIOTECA DE EJERCICIOS
+
+// GET /api/fisio/biblioteca
 router.get('/biblioteca', [authMiddleware, fisioMiddleware], async (req, res) => {
   try {
     const ejercicios = await EjercicioBiblioteca.findAll({
       where: { fisioterapeutaId: req.usuario.id },
       include: [{ model: Categoria, as: 'categoria', attributes: ['nombre'] }],
-      // --- SOLUCIÓN AL ERROR SQL ---
-      // El 'order' debe hacer referencia al modelo o al alias, no a un string
       order: [
         [{ model: Categoria, as: 'categoria' }, 'nombre', 'ASC'],
         ['nombre', 'ASC']
@@ -97,7 +93,7 @@ router.get('/biblioteca', [authMiddleware, fisioMiddleware], async (req, res) =>
   }
 });
 
-// POST /api/fisio/biblioteca (Arregla el CATCH)
+// POST /api/fisio/biblioteca 
 router.post('/biblioteca', [authMiddleware, fisioMiddleware], async (req, res) => {
   let { nombre, descripcion, videoUrl, categoriaId, reglasPostura } = req.body;
   try {
@@ -105,15 +101,14 @@ router.post('/biblioteca', [authMiddleware, fisioMiddleware], async (req, res) =
       nombre,
       descripcion,
       videoUrl: videoUrl === '' ? null : videoUrl,
-      categoriaId, // Usa categoriaId
+      categoriaId,
       fisioterapeutaId: req.usuario.id,
       reglasPostura: reglasPostura
     });
     res.status(201).json(nuevoEjercicio);
   } catch (error) {
-    // --- SOLUCIÓN AL REFERENCEERROR ---
-    console.error('--- ERROR DETECTADO AL GUARDAR EJERCICIO ---');
-    console.error(error); // Muestra el error real (probablemente de validación)
+    console.error('ERROR DETECTADO AL GUARDAR EJERCICIO');
+    console.error(error); 
     if (error.name === 'SequelizeValidationError') {
       const mensajes = error.errors.map(err => err.message).join('. ');
       return res.status(400).json({ msg: `Error de validación: ${mensajes}` });
@@ -125,7 +120,6 @@ router.post('/biblioteca', [authMiddleware, fisioMiddleware], async (req, res) =
 
 // PUT /api/fisio/biblioteca/:id
 router.put('/biblioteca/:id', [authMiddleware, fisioMiddleware], async (req, res) => {
-  // 1. AÑADE 'reglasPostura' AQUÍ
   const { nombre, descripcion, videoUrl, categoriaId, reglasPostura } = req.body;
   
   try {
@@ -138,14 +132,12 @@ router.put('/biblioteca/:id', [authMiddleware, fisioMiddleware], async (req, res
     ejercicio.descripcion = descripcion;
     ejercicio.videoUrl = videoUrl === '' ? null : videoUrl;
     ejercicio.categoriaId = categoriaId;
-    
-    // 2. Y AÑÁDELO AQUÍ PARA ACTUALIZARLO
     ejercicio.reglasPostura = reglasPostura;
 
     await ejercicio.save();
     res.json(ejercicio);
   } catch (error) {
-    console.error('--- ERROR DETECTADO AL ACTUALIZAR EJERCICIO ---');
+    console.error('ERROR DETECTADO AL ACTUALIZAR EJERCICIO');
     console.error(error);
     if (error.name === 'SequelizeValidationError') {
       return res.status(400).json({ msg: 'Error de validación.' });
@@ -154,7 +146,7 @@ router.put('/biblioteca/:id', [authMiddleware, fisioMiddleware], async (req, res
   }
 });
 
-// DELETE /api/fisio/biblioteca/:id (Arregla el CATCH)
+// DELETE /api/fisio/biblioteca/:id 
 router.delete('/biblioteca/:id', [authMiddleware, fisioMiddleware], async (req, res) => {
   try {
     const ejercicio = await EjercicioBiblioteca.findOne({
@@ -165,15 +157,16 @@ router.delete('/biblioteca/:id', [authMiddleware, fisioMiddleware], async (req, 
     await ejercicio.destroy();
     res.json({ msg: 'Ejercicio eliminado correctamente.' });
   } catch (error) {
-    // --- SOLUCIÓN AL REFERENCEERROR ---
-    console.error('--- ERROR DETECTADO AL BORRAR EJERCICIO ---');
+    console.error('ERROR DETECTADO AL BORRAR EJERCICIO');
     console.error(error);
     res.status(500).json({ msg: 'Error al eliminar el ejercicio.' });
   }
 });
 
-// --- 6. RUTAS CRUD DE CATEGORÍAS (Limpia los CATCH) ---
 
+//RUTAS PARA LAS CATEGORIAS
+
+// GET /api/fisio/categorias
 router.get('/categorias', [authMiddleware], async (req, res) => {
   try {
     const categorias = await Categoria.findAll({ order: [['nombre', 'ASC']] });
@@ -184,6 +177,7 @@ router.get('/categorias', [authMiddleware], async (req, res) => {
   }
 });
 
+// POST /api/fisio/categorias
 router.post('/categorias', [authMiddleware, fisioMiddleware], async (req, res) => {
   try {
     const { nombre } = req.body;
@@ -195,6 +189,7 @@ router.post('/categorias', [authMiddleware, fisioMiddleware], async (req, res) =
   }
 });
 
+// DELETE /api/fisio/categorias/:id
 router.delete('/categorias/:id', [authMiddleware, fisioMiddleware], async (req, res) => {
   try {
     const categoria = await Categoria.findByPk(req.params.id);
@@ -211,11 +206,10 @@ router.delete('/categorias/:id', [authMiddleware, fisioMiddleware], async (req, 
 });
 
 
-// --- RUTA DE ESTADÍSTICAS (DASHBOARD) ---
+// ESTADÍSTICAS DEL DASHBOARD
 // GET /api/fisio/stats
 router.get('/stats', [authMiddleware, fisioMiddleware], async (req, res) => {
   try {
-    // ... (1. Citas Hoy y 2. Total Pacientes se quedan igual) ...
     const hoy = new Date();
     const inicioDia = new Date(hoy.setHours(0, 0, 0, 0));
     const finDia = new Date(hoy.setHours(23, 59, 59, 999));
@@ -231,7 +225,7 @@ router.get('/stats', [authMiddleware, fisioMiddleware], async (req, res) => {
       where: { rol: 'paciente' }
     });
 
-    // ... (3. Gráfico Semanal se queda igual) ...
+    // Gráfico semanal
     const curr = new Date(); 
     const primerDiaSemana = new Date(curr.setDate(curr.getDate() - curr.getDay() + 1));
     primerDiaSemana.setHours(0,0,0,0);
@@ -258,7 +252,7 @@ router.get('/stats', [authMiddleware, fisioMiddleware], async (req, res) => {
     });
 
 
-    // --- 3b. GRÁFICO DONUT: CITAS POR TIPO (NUEVO) ---
+    // Gráfico Donut de citas por tipo
     const citasPorTipoRaw = await Cita.findAll({
       attributes: [
         'tipo',
@@ -267,7 +261,6 @@ router.get('/stats', [authMiddleware, fisioMiddleware], async (req, res) => {
       group: ['tipo']
     });
 
-    // Formateamos para Recharts: [{ name: 'Masaje', value: 10 }]
     const graficoTipos = citasPorTipoRaw.map(item => ({
       name: item.tipo,
       value: parseInt(item.getDataValue('total'))
@@ -278,7 +271,7 @@ router.get('/stats', [authMiddleware, fisioMiddleware], async (req, res) => {
       citasHoy,
       totalPacientes,
       graficoSemanal: diasGrafico,
-      graficoTipos // <-- Enviamos el nuevo gráfico
+      graficoTipos 
     });
 
   } catch (error) {
@@ -288,7 +281,7 @@ router.get('/stats', [authMiddleware, fisioMiddleware], async (req, res) => {
 });
 
 
-// --- RUTA PARA OBTENER EL HISTORIAL DE RESULTADOS DE UN PACIENTE ---
+// HISTORIAL DE RESULTADOS DE UN PACIENTE
 // GET /api/fisio/paciente/:id/resultados
 router.get('/paciente/:id/resultados', [authMiddleware, fisioMiddleware], async (req, res) => {
   try {
@@ -297,10 +290,10 @@ router.get('/paciente/:id/resultados', [authMiddleware, fisioMiddleware], async 
       include: [
         { 
           model: Ejercicio, 
-          attributes: ['nombreEjercicio'] // Para saber qué ejercicio hizo
+          attributes: ['nombreEjercicio'] 
         }
       ],
-      order: [['fecha', 'DESC']] // Los más recientes primero
+      order: [['fecha', 'DESC']]
     });
 
     res.json(resultados);
@@ -311,7 +304,9 @@ router.get('/paciente/:id/resultados', [authMiddleware, fisioMiddleware], async 
   }
 });
 
-// --- GESTIÓN DE HORARIO ---
+
+// GESTIÓN DE HORARIO
+
 // GET /api/fisio/horario
 router.get('/horario', [authMiddleware, fisioMiddleware], async (req, res) => {
   try {
@@ -324,12 +319,11 @@ router.get('/horario', [authMiddleware, fisioMiddleware], async (req, res) => {
   }
 });
 
-// POST /api/fisio/horario (Guardar configuración masiva)
+// POST /api/fisio/horario
 router.post('/horario', [authMiddleware, fisioMiddleware], async (req, res) => {
-  const { dias } = req.body; // Array de objetos [{ diaSemana: 1, horaInicio: '09:00', ... }]
+  const { dias } = req.body; 
   
   try {
-    // Borramos lo anterior y guardamos lo nuevo (estrategia simple)
     await Disponibilidad.destroy({ where: { fisioterapeutaId: req.usuario.id } });
     
     const nuevosDias = dias.map(d => ({ ...d, fisioterapeutaId: req.usuario.id }));
@@ -342,7 +336,8 @@ router.post('/horario', [authMiddleware, fisioMiddleware], async (req, res) => {
   }
 });
 
-// --- RUTA PARA OBTENER LAS RUTINAS DE UN PACIENTE ---
+
+// OBTENER LAS RUTINAS DE UN PACIENTE
 // GET /api/fisio/paciente/:id/rutinas
 router.get('/paciente/:id/rutinas', [authMiddleware, fisioMiddleware], async (req, res) => {
   try {
@@ -350,9 +345,9 @@ router.get('/paciente/:id/rutinas', [authMiddleware, fisioMiddleware], async (re
       where: { pacienteAsignadoId: req.params.id },
       include: [{ 
         model: Ejercicio, 
-        as: 'ejercicios' // Muestra los ejercicios dentro de cada rutina
+        as: 'ejercicios' 
       }],
-      order: [['createdAt', 'DESC']] // Las más nuevas primero
+      order: [['createdAt', 'DESC']] 
     });
     res.json(rutinas);
   } catch (error) {
@@ -361,7 +356,7 @@ router.get('/paciente/:id/rutinas', [authMiddleware, fisioMiddleware], async (re
   }
 });
 
-// --- RUTA PARA BORRAR UNA RUTINA (Ya que estás, añade esta también por si acaso) ---
+// BORRAR UNA RUTINA
 // DELETE /api/fisio/rutinas/:id
 router.delete('/rutinas/:id', [authMiddleware, fisioMiddleware], async (req, res) => {
   try {

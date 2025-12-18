@@ -25,12 +25,12 @@ function App() {
       <Navbar />
       <main style={{ minHeight: '80vh' }}>
         <Routes>
-          {/* --- Rutas Públicas --- */}
+          {/* Rutas Públicas */}
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registro" element={<RegistroPage />} />
 
-          {/* --- Rutas Protegidas --- */}
+          {/* Rutas Protegidas */}
           <Route element={<RutaProtegida />}>
             <Route path="/rutinas" element={<MisRutinasPage />} />
             <Route path="/reservar" element={<ReservarCitaPage />} />
@@ -40,7 +40,7 @@ function App() {
             <Route path="/mi-cuenta" element={<MiCuentaPage />} />
           </Route>
 
-          {/* --- Rutas Protegidas Fisio --- */}
+          {/* Rutas Protegidas Fisio */}
           <Route element={<RutaProtegidaFisio />}>
             <Route path="/fisio/dashboard" element={<FisioDashboardPage />} />
             

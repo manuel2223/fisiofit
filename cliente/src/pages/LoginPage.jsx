@@ -1,4 +1,3 @@
-// En cliente/src/pages/LoginPage.jsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -18,14 +17,14 @@ function LoginPage() {
     e.preventDefault();
     setErroresCampos({}); 
 
-    // --- VALIDACIÓN VISUAL MEJORADA ---
+    // validación 
     const nuevosErrores = {};
     let hayError = false;
-    let mensajeEspecificoMostrado = false; // Bandera para controlar los toasts
+    let mensajeEspecificoMostrado = false; 
     
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // 1. Validar Email
+    // Validar Email
     if (!email.trim()) {
       nuevosErrores.email = true;
       hayError = true;
@@ -33,28 +32,24 @@ function LoginPage() {
       nuevosErrores.email = true;
       hayError = true;
       
-      // Error específico
       toast.error('El formato del email no es válido.');
-      mensajeEspecificoMostrado = true; // Marcamos que ya hemos avisado
+      mensajeEspecificoMostrado = true; 
     }
 
-    // 2. Validar Password
+    // Validar Password
     if (!password.trim()) {
       nuevosErrores.password = true;
       hayError = true;
     }
 
-    // Decisión final de errores
     if (hayError) {
       setErroresCampos(nuevosErrores);
       
-      // SOLO mostramos el mensaje genérico si NO hemos mostrado ya uno específico
       if (!mensajeEspecificoMostrado) {
          toast.error('Por favor, rellena los campos correctamente.');
       }
       return;
     }
-    // -----------------------------------
 
     const toastId = toast.loading('Iniciando sesión...');
 

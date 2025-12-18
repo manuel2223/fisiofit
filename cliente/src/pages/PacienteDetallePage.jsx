@@ -1,4 +1,3 @@
-// En cliente/src/pages/PacienteDetallePage.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../api';
@@ -37,15 +36,12 @@ function PacienteDetallePage() {
     cargarDatos();
   }, [id]);
 
-  // --- LÓGICA DE BORRADO (TOAST) ---
-
-  // 1. Función que ejecuta el borrado real
   const borrarRutinaReal = async (rutinaId) => {
     const toastId = toast.loading('Eliminando rutina...');
     try {
       await api.delete(`/fisio/rutinas/${rutinaId}`);
       
-      // Actualizamos la lista localmente
+      // Actualiza la lista localmente
       setRutinas(current => current.filter(r => r.id !== rutinaId));
       
       toast.success('Rutina eliminada', { id: toastId });
@@ -55,7 +51,6 @@ function PacienteDetallePage() {
     }
   };
 
-  // 2. Función que muestra la confirmación
   const handleDeleteRutina = (rutinaId) => {
     toast((t) => (
       <div className="toast-confirmacion">
@@ -81,7 +76,7 @@ function PacienteDetallePage() {
     ), { duration: 5000, style: { border: '1px solid #E53E3E', padding: '16px' } });
   };
 
-  // --- RENDER ---
+
 
   if (cargando) return <div className="ficha-container"><h2>Cargando ficha...</h2></div>;
   if (!paciente) return <div className="ficha-container"><h2>Paciente no encontrado</h2></div>;

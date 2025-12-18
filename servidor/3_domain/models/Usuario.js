@@ -3,7 +3,6 @@ const sequelize = require('../../4_infrastructure/database/db');
 const bcrypt = require('bcryptjs');
 
 class Usuario extends Model {
-  // Método de instancia para verificar la contraseña
   validarPassword(password) {
     return bcrypt.compareSync(password, this.password);
   }
@@ -22,9 +21,9 @@ Usuario.init({
   email: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true, // El email debe ser único
+    unique: true, 
     validate: {
-      isEmail: true // Validación de formato de email
+      isEmail: true 
     }
   },
   password: {
@@ -38,7 +37,7 @@ Usuario.init({
 }, {
   sequelize,
   modelName: 'Usuario',
-  // Hook para cifrar la contraseña antes de crear (CREATE) o actualizar (UPDATE)
+  // Ciframos la contraseña
   hooks: {
     beforeCreate: async (usuario) => {
       const salt = await bcrypt.genSalt(10);

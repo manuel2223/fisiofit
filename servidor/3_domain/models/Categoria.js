@@ -1,6 +1,5 @@
-// En servidor/3_domain/models/Categoria.js
 const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../../4_infrastructure/database/db'); // Ajusta esta ruta
+const sequelize = require('../../4_infrastructure/database/db');
 
 class Categoria extends Model {}
 
@@ -13,9 +12,8 @@ Categoria.init({
   nombre: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true // No queremos dos categorías "Core"
+    unique: true 
   }
-  // No necesitamos 'fisioterapeutaId' aquí, las categorías son globales
 }, {
   sequelize,
   modelName: 'Categoria'

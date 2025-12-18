@@ -8,25 +8,24 @@ function AsignarRutinaPage() {
   const { pacienteId } = useParams();
   const navigate = useNavigate();
 
-  // --- Estados de Carga ---
+  // Estados de Carga 
   const [paciente, setPaciente] = useState(null);
   const [biblioteca, setBiblioteca] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [cargando, setCargando] = useState(true);
-  // (Borramos estado 'error' local, usaremos Toast)
 
-  // --- Estados del Constructor ---
+  // Estados del Constructor 
   const [nombreRutina, setNombreRutina] = useState('');
   const [ejerciciosRutina, setEjerciciosRutina] = useState([]); 
   
-  // --- Estado para validación visual ---
+  // Estado para validación visual 
   const [erroresCampos, setErroresCampos] = useState({}); 
 
-  // --- Estados de los Filtros ---
+  // Estados de los Filtros 
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // 1. Carga todos los datos al iniciar
+  // Carga todos los datos al iniciar
   useEffect(() => {
     const cargarDatos = async () => {
       try {
@@ -47,7 +46,7 @@ function AsignarRutinaPage() {
     cargarDatos();
   }, [pacienteId]);
 
-  // 2. Lógica de Filtro
+  // Lógica de Filtro
   const bibliotecaFiltrada = useMemo(() => {
     if (!Array.isArray(biblioteca)) return []; 
     
@@ -62,8 +61,7 @@ function AsignarRutinaPage() {
       );
   }, [biblioteca, selectedCategory, searchQuery]);
 
-  // 3. Lógica del Constructor
-
+  // Lógica del Constructor
   const addEjercicioToRutina = (ejercicioDeBiblioteca) => {
     setEjerciciosRutina([
       ...ejerciciosRutina,
@@ -91,12 +89,12 @@ function AsignarRutinaPage() {
     setEjerciciosRutina(nuevosEjercicios);
   };
 
-  // 4. Envío del Formulario
+  // Envío del Formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErroresCampos({}); // Reiniciar errores visuales
     
-    // --- VALIDACIÓN ---
+    // VALIDACIÓN 
     let hayError = false;
     const nuevosErrores = {};
 
@@ -163,10 +161,10 @@ function AsignarRutinaPage() {
 
         <hr />
 
-        {/* --- EL CONSTRUCTOR DE DOS COLUMNAS --- */}
+        {/* CONSTRUCTOR DE DOS COLUMNAS */}
         <div className="constructor-layout">
           
-          {/* --- Columna Izquierda (Biblioteca) --- */}
+          {/* Biblioteca */}
           <div className="constructor-biblioteca">
             <h4>Biblioteca de Ejercicios</h4>
             
@@ -215,7 +213,7 @@ function AsignarRutinaPage() {
             </ul>
           </div>
 
-          {/* --- Columna Derecha (Rutina) --- */}
+          {/* Rutina */}
           <div className="constructor-rutina">
             <h4>Ejercicios de esta Rutina</h4>
             
@@ -258,7 +256,7 @@ function AsignarRutinaPage() {
           </div>
         </div>
         
-        {/* Botón de Enviar */}
+        {/* Enviar */}
         <button type="submit" className="boton-primario" style={{width: '100%', marginTop: '2rem'}}>
           Asignar Rutina Completa
         </button>

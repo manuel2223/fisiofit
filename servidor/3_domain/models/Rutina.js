@@ -14,7 +14,6 @@ Rutina.init({
     allowNull: false,
     defaultValue: 'Rutina de seguimiento'
   }
-  // Las claves foráneas (pacienteAsignadoId, fisioterapeutaCreadorId) se añaden en el Paso 2
 }, {
   sequelize,
   modelName: 'Rutina'

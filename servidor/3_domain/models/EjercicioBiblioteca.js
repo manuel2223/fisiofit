@@ -1,4 +1,3 @@
-// En servidor/models/EjercicioBiblioteca.js
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../../4_infrastructure/database/db'); 
 
@@ -22,15 +21,13 @@ EjercicioBiblioteca.init({
     type: DataTypes.STRING,
     allowNull: true,
     validate: {
-      isUrl: true // Opcional: valida que sea una URL
+      isUrl: true 
     }
   },
   reglasPostura: {
     type: DataTypes.JSON,
-    allowNull: true // Es opcional, no todos los ejercicios tendrán IA
+    allowNull: true
   }
- 
-  // La clave foránea 'fisioterapeutaId' la añadiremos en models/index.js
 }, {
   sequelize,
   modelName: 'EjercicioBiblioteca'

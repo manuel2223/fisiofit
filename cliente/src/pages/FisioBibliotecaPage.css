@@ -1,5 +1,3 @@
-/* En cliente/src/pages/FisioBibliotecaPage.css */
-
 .biblioteca-container {
   width: 90%;
   max-width: 1200px;
@@ -153,11 +151,11 @@
 
 
 .input-error {
-  border: 2px solid #E53E3E !important; /* Rojo fuerte */
-  background-color: #FFF5F5; /* Fondo rojizo muy suave */
+  border: 2px solid #E53E3E !important;
+  background-color: #FFF5F5; 
 }
 
-/* Opcional: Animación de "temblor" para llamar la atención */
+
 .input-error:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.2);
@@ -256,8 +254,8 @@
 .boton-add-regla {
   width: 100%;
   background-color: white;
-  color: var(--color-principal); /* Tu verde turquesa */
-  border: 2px dashed var(--color-principal); /* Borde discontinuo */
+  color: var(--color-principal); 
+  border: 2px dashed var(--color-principal); 
   padding: 12px;
   border-radius: 8px;
   font-weight: 600;
@@ -268,13 +266,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem; /* Espacio entre el icono + y el texto */
+  gap: 0.5rem; 
 }
 
 .boton-add-regla:hover {
-  background-color: #f0fdf4; /* Un verde muy muy suave de fondo */
-  border-style: solid; /* El borde se vuelve sólido al pasar el ratón */
-  transform: translateY(-2px); /* Pequeño efecto de elevación */
+  background-color: #f0fdf4; 
+  border-style: solid; 
+  transform: translateY(-2px); 
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 

@@ -1,7 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../../4_infrastructure/database/db'); 
 
-
 class Cita extends Model {}
 
 Cita.init({
@@ -24,9 +23,8 @@ Cita.init({
     defaultValue: 'pendiente'
   },
 
-  // --- NUEVOS CAMPOS ---
   motivo: {
-    type: DataTypes.TEXT, // Texto largo para la descripción
+    type: DataTypes.TEXT,
     allowNull: true
   },
   tipo: {
@@ -34,7 +32,6 @@ Cita.init({
     allowNull: false,
     defaultValue: 'Masaje Deportivo'
   }
-  // Las claves foráneas (pacienteId, fisioterapeutaId) se añaden en el Paso 2
 }, {
   sequelize,
   modelName: 'Cita'

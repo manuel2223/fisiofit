@@ -57,3 +57,102 @@
   width: 100%;
   height: 100%;
 }
+/* --- TarjetaRutina.css --- */
+
+/* La fila del ejercicio */
+.ejercicio-row {
+  display: flex;
+  align-items: center; /* Alineado al centro verticalmente */
+  gap: 20px; /* Más espacio entre video y texto */
+  background: var(--color-blanco);
+  padding: 15px;
+  border-radius: 8px; /* Bordes redondeados estándar, no exagerados */
+  margin-bottom: 15px;
+  border: 1px solid var(--color-borde);
+  transition: all 0.2s ease-in-out;
+}
+
+.ejercicio-row:hover {
+  border-color: var(--color-principal); /* Borde Teal al pasar el mouse */
+  box-shadow: 0 4px 12px rgba(0, 128, 128, 0.1); /* Sombra suave en tono Teal */
+}
+
+/* 1. IMAGEN / GIF - AHORA MÁS GRANDE */
+.ejercicio-media img {
+  width: 140px;  /* Antes era 70px, ahora es el doble */
+  height: 100px; /* Formato rectangular para ver mejor el movimiento */
+  object-fit: contain; /* Que el muñeco se vea entero */
+  border-radius: 6px;
+  background: var(--color-fondo); /* Fondo gris claro suave */
+  border: 1px solid var(--color-borde);
+  mix-blend-mode: multiply; /* Integra el fondo del GIF */
+}
+
+/* 2. INFO CENTRAL */
+.ejercicio-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ejercicio-info h4 {
+  margin: 0 0 10px 0;
+  font-size: 1.1rem;
+  color: var(--color-texto);
+  font-weight: 700;
+}
+
+/* Etiquetas de Series y Reps (Más sobrias) */
+.metadata-series {
+  display: flex;
+  gap: 10px;
+}
+
+.pill {
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+  border: 1px solid var(--color-borde);
+  padding: 4px 12px;
+  border-radius: 6px; /* Rectangular con borde redondeado, no ovalado */
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* 3. BOTÓN DE IA (Corporativo) */
+.ejercicio-action {
+    min-width: 160px;
+    text-align: right;
+}
+
+.btn-ia-action {
+  background-color: var(--color-principal); /* Tu #008080 */
+  color: var(--color-blanco);
+  text-decoration: none;
+  padding: 10px 20px; /* Botón más sólido */
+  border-radius: 6px; /* Rectangular con bordes redondeados (match con la web) */
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background-color 0.2s;
+  display: inline-block;
+  border: 1px solid transparent;
+}
+
+.btn-ia-action:hover {
+  background-color: #006666; /* Un tono un poco más oscuro del principal */
+  /* O podrías usar var(--color-acento) si quieres que destaque más */
+}
+
+/* Mensaje de lista vacía */
+.empty-msg {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    font-style: italic;
+    background: var(--color-fondo);
+    border-radius: 8px;
+    border: 1px dashed var(--color-borde);
+}

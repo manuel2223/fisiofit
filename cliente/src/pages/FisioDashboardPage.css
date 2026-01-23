@@ -229,3 +229,38 @@
 }
 
 
+/* Arreglo del formulario de categorías */
+.form-inline-categoria {
+  display: flex;
+  gap: 8px;
+  align-items: center; /* Alineación vertical perfecta */
+  width: 100%;
+}
+
+.form-inline-categoria input {
+  flex: 1; /* Ocupa todo el espacio disponible */
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  height: 40px; /* Altura fija */
+  box-sizing: border-box; /* Importante para que el padding no sume altura extra */
+  outline: none;
+  transition: border 0.2s;
+}
+
+.form-inline-categoria input:focus {
+  border-color: #6c5ce7; /* Color de acento al escribir */
+}
+
+.form-inline-categoria button {
+  height: 40px; /* EXACTAMENTE la misma altura que el input */
+  width: 40px;  /* Hacemos que sea un cuadrado perfecto */
+  padding: 0;   /* Quitamos padding lateral para centrar el + */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem; /* El símbolo + más grande y legible */
+  line-height: 1;
+  border-radius: 6px;
+  /* El color de fondo ya lo coge de tu clase .boton-primario */
+}

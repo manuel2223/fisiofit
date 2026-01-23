@@ -2,64 +2,83 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import './TarjetaRutina.css';
 
-// Función para transformar URl
-const getEmbedUrl = (url) => {
-  if (!url) return null;
-  
-  // Esta expresión regular extrae el ID del video de cualquier enlace de YouTube
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-  const match = url.match(regExp);
-
-  return (match && match[2].length === 11)
-    ? `https://www.youtube.com/embed/${match[2]}`
-    : null;
-};
-
 function TarjetaRutina({ rutina }) {
+
+  // Recuperamos la lista (ya sea minúscula o mayúscula)
+  const listaEjercicios = rutina.ejercicios || rutina.Ejercicios || [];
 
   return (
     <div className="tarjeta-rutina tarjeta">
-      <h3>{rutina.nombre}</h3>
-      <p className="creador">
-        Asignada por: <strong>{rutina.fisioterapeutaCreador ? rutina.fisioterapeutaCreador.nombre : 'Doctor'}</strong>
+      <div className="rutina-header">
+        <h3>{rutina.nombre}</h3>
+        {/* Usamos el color de acento o principal para el badge de frecuencia */}
+        <span className="badge-frecuencia" style={{
+            background: 'var(--color-acento)', 
+            color: '#004d40', // Un verde oscuro para contraste
+            borderRadius: '4px',
+            padding: '4px 8px'
+        }}>
+            {rutina.frecuenciaSemanal || 'Rutina'}
+        </span>
+      </div>
+      
+      <p className="creador" style={{color: 'var(--color-texto)', opacity: 0.8}}>
+        <small>Asignada por: <strong>{rutina.fisioterapeutaCreador?.nombre || 'Tu Fisio'}</strong></small>
       </p>
 
-      <h4>Ejercicios:</h4>
-      <ul className="lista-ejercicios">
-        {rutina.ejercicios.map((ejercicio, index) => {
-          const embedUrl = getEmbedUrl(ejercicio.videoUrl);
+      <div className="lista-ejercicios-paciente">
+        {listaEjercicios.map((ejInstancia, index) => {
+          
+          const datos = {
+            idParaIA: ejInstancia.EjercicioBibliotecaId || ejInstancia.ejercicioBibliotecaId || ejInstancia.id, 
+            nombre: ejInstancia.nombreEjercicio || "Ejercicio",
+            videoUrl: ejInstancia.videoUrl,
+            series: ejInstancia.series,
+            reps: ejInstancia.repeticiones,
+            reglas: ejInstancia.reglasPostura 
+          };
 
           return (
-            <li key={index} className="ejercicio-item">
-              <span className="nombre">{ejercicio.nombreEjercicio}</span>
-              <span className="series">{ejercicio.series} x {ejercicio.repeticiones} reps</span>
-              
-              {embedUrl && (
-                <div className="video-container">
-                  <iframe
-                    src={embedUrl} 
-                    title={`Video de ${ejercicio.nombreEjercicio}`}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
-                </div>
-              )}
+            <div key={index} className="ejercicio-row">
+              {/* 1. IMAGEN GRANDE */}
+              <div className="ejercicio-media">
+                <img 
+                  src={datos.videoUrl} 
+                  alt={datos.nombre}
+                  onError={(e) => e.target.src = 'https://via.placeholder.com/150?text=Sin+Img'}
+                />
+              </div>
 
-              {/* Solo se muestra si el ejercicio tiene reglas de postura */}
-              {ejercicio.reglasPostura && (
-                <Link 
-                  to={`/entrenar/${ejercicio.id}`} 
-                  className="boton-primario"
-                  style={{textDecoration: 'none', marginTop: '1rem', display: 'block', textAlign: 'center'}}
-                >
-                  Comprobar Postura con IA
-                </Link>
-              )}
-            </li>
+              {/* 2. INFO */}
+              <div className="ejercicio-info">
+                <h4>{datos.nombre}</h4>
+                <div className="metadata-series">
+                   <span className="pill">🔁 {datos.series} Series</span>
+                   <span className="pill">⚡ {datos.reps} Reps</span>
+                </div>
+              </div>
+
+              {/* 3. BOTÓN IA RECTANGULAR */}
+              <div className="ejercicio-action">
+                 {datos.reglas && datos.reglas.length > 0 && (
+                   <Link 
+                     to={`/entrenar/${datos.idParaIA}`} 
+                     className="btn-ia-action"
+                   >
+                     📷 Comprobar con IA
+                   </Link>
+                 )}
+              </div>
+            </div>
           );
         })}
-      </ul>
+        
+        {listaEjercicios.length === 0 && (
+            <div className="empty-msg">
+              No hay ejercicios asignados a esta rutina.
+            </div>
+        )}
+      </div>
     </div>
   );
 }

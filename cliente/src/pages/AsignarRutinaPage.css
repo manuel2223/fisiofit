@@ -174,3 +174,76 @@
   outline: none;
   box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.2);
 }
+
+/* Lista del Picker (Buscador a la izquierda) */
+.lista-biblioteca-picker {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0 0;
+  height: 400px; /* Altura fija con scroll */
+  overflow-y: auto;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #f9f9f9;
+}
+
+/* El item individual (Micro-Ficha) */
+.lista-biblioteca-picker li {
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 8px;
+  margin: 5px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  transition: all 0.2s;
+  gap: 10px;
+}
+
+.lista-biblioteca-picker li:hover {
+  border-color: #6c5ce7;
+
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+/* La imagen mini */
+.picker-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 4px;
+  background: #fff;
+  border: 1px solid #eee;
+  mix-blend-mode: multiply; /* Para quitar el blanco del GIF */
+}
+
+/* El nombre */
+.picker-info {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #333;
+  line-height: 1.2;
+}
+
+/* El botón de añadir */
+.btn-add-picker {
+  width: 30px;
+  height: 30px;
+  border: none;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 50%; /* Redondo */
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  padding: 0; /* Importante para centrar el + */
+}
+
+.btn-add-picker:hover {
+  background-color: #c8e6c9;
+  transform: scale(1.1);
+}

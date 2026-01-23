@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import api from '../api';
 import toast from 'react-hot-toast';
 import './FisioBibliotecaPage.css';
+import EjercicioCard from '../components/EjercicioCard'; 
 
-// diccionario de las articulaciones
+// --- 1. TU DICCIONARIO ORIGINAL DE ARTICULACIONES ---
 const ARTICULACIONES_DISPONIBLES = {
   rodilla_derecha: {
     label: "Pierna Derecha",
@@ -46,29 +47,26 @@ function FisioBibliotecaPage() {
   
   const [idEditando, setIdEditando] = useState(null);
   
-  // estados del Ejercicio
+  // --- ESTADOS DEL FORMULARIO ---
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
   const [categoria, setCategoria] = useState(''); 
-  
-  // estados de Validación Visual
+  const [reglas, setReglas] = useState([]); 
   const [erroresCampos, setErroresCampos] = useState({}); 
-
-  // estados de Categoría
   const [nuevaCategoriaNombre, setNuevaCategoriaNombre] = useState('');
 
-  
-  const [reglas, setReglas] = useState([]); 
-  
-  // estados temporales default
+  // --- ESTADOS ESPECÍFICOS DEL CONSTRUCTOR DE REGLAS (RESTAURADOS) ---
   const [nuevaReglaArticulacion, setNuevaReglaArticulacion] = useState('rodilla_derecha');
   const [nuevaReglaMin, setNuevaReglaMin] = useState(70);
   const [nuevaReglaMax, setNuevaReglaMax] = useState(110);
   const [nuevaReglaMensaje, setNuevaReglaMensaje] = useState('Corrige la postura');
 
+  // --- ESTADOS DEL BUSCADOR ---
+  const [busqueda, setBusqueda] = useState('');
+  const [filtroCategoria, setFiltroCategoria] = useState('todas');
 
-  // carga de datos
+  // --- CARGA DE DATOS ---
   const fetchCategorias = async () => {
     try {
       const resCat = await api.get('/fisio/categorias');
@@ -97,35 +95,53 @@ function FisioBibliotecaPage() {
       await fetchBiblioteca();
       const cats = await fetchCategorias();
       if (cats && cats.length > 0 && !idEditando) {
-        setCategoria(cats[0].id);
+        setCategoria(cats[0].id); 
       }
       setCargando(false);
     };
     cargarDatosIniciales();
   }, []);
 
-  // handlers
+  // --- LÓGICA DE FILTRADO ---
+  const ejerciciosFiltrados = useMemo(() => {
+    return biblioteca.filter(ej => {
+      const coincideTexto = ej.nombre.toLowerCase().includes(busqueda.toLowerCase());
+      const coincideCategoria = filtroCategoria === 'todas' 
+        ? true 
+        : ej.categoriaId === parseInt(filtroCategoria);
+      return coincideTexto && coincideCategoria;
+    });
+  }, [biblioteca, busqueda, filtroCategoria]);
 
+
+  // --- HANDLERS ---
   const limpiarFormulario = () => {
     setIdEditando(null);
     setNombre('');
     setDescripcion('');
     setVideoUrl('');
     setCategoria(categorias.length > 0 ? categorias[0].id : '');
-    setReglas([]); // Limpia las reglas
+    setReglas([]); 
     setErroresCampos({}); 
+    // Restaurar valores por defecto del constructor de reglas
+    setNuevaReglaArticulacion('rodilla_derecha');
+    setNuevaReglaMin(70);
+    setNuevaReglaMax(110);
+    setNuevaReglaMensaje('Corrige la postura');
   };
 
   const handleEditClick = (ejercicio) => {
-    setIdEditando(ejercicio.id);
+    console.log("Editando ejercicio:", ejercicio); // Debug
+    setIdEditando(ejercicio.id); // Guardamos el ID clave para el PUT
     setNombre(ejercicio.nombre);
     setDescripcion(ejercicio.descripcion || '');
     setVideoUrl(ejercicio.videoUrl || '');
     setCategoria(ejercicio.categoriaId);
     
-    // Cargar reglas existentes (si las hay)
+    // Recuperamos las reglas si existen
     if (ejercicio.reglasPostura) {
-      setReglas(ejercicio.reglasPostura);
+      // Si viene de la BD a veces es JSON string, a veces objeto. Aseguramos array.
+      setReglas(Array.isArray(ejercicio.reglasPostura) ? ejercicio.reglasPostura : []);
     } else {
       setReglas([]);
     }
@@ -135,18 +151,8 @@ function FisioBibliotecaPage() {
   };
 
   const handleDelete = async (id) => {
-    toast((t) => (
-      <div className="toast-confirmacion">
-        <p>¿Borrar este ejercicio?</p>
-        <div className="toast-botones">
-          <button onClick={() => { toast.dismiss(t.id); borrarEjercicioReal(id); }} className="btn-toast-confirmar">Sí</button>
-          <button onClick={() => toast.dismiss(t.id)} className="btn-toast-cancelar">No</button>
-        </div>
-      </div>
-    ), { duration: 5000 });
-  };
-
-  const borrarEjercicioReal = async (id) => {
+    if(!window.confirm("¿Seguro que quieres eliminarlo?")) return;
+    
     const toastId = toast.loading('Borrando...');
     try {
       await api.delete(`/fisio/biblioteca/${id}`);
@@ -158,8 +164,7 @@ function FisioBibliotecaPage() {
     }
   };
 
-  // constructor de reglas
-
+  // --- LÓGICA CONSTRUCTOR DE REGLAS (ORIGINAL) ---
   const addRegla = () => {
     // busca la config en el diccionario
     const config = ARTICULACIONES_DISPONIBLES[nuevaReglaArticulacion];
@@ -182,11 +187,10 @@ function FisioBibliotecaPage() {
     setReglas(nuevas);
   };
 
-  // formulario principal
+  // --- SUBMIT DEL FORMULARIO ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErroresCampos({}); 
-
     const nuevosErrores = {};
     let hayError = false;
 
@@ -206,15 +210,16 @@ function FisioBibliotecaPage() {
       descripcion, 
       videoUrl, 
       categoriaId: categoria,
-      // enviar las reglas
       reglasPostura: reglas.length > 0 ? reglas : null 
     };
 
     try {
       if (idEditando) {
+        // PUT para actualizar
         await api.put(`/fisio/biblioteca/${idEditando}`, datosEjercicio);
         toast.success('Ejercicio actualizado', { id: toastId });
       } else {
+        // POST para crear
         await api.post('/fisio/biblioteca', datosEjercicio);
         toast.success('Ejercicio creado', { id: toastId });
       }
@@ -229,7 +234,7 @@ function FisioBibliotecaPage() {
     }
   };
 
-  // gestion de categorias
+  // --- GESTIÓN CATEGORÍAS ---
   const handleCategoriaSubmit = async (e) => {
     e.preventDefault();
     if (!nuevaCategoriaNombre.trim()) return;
@@ -252,7 +257,7 @@ function FisioBibliotecaPage() {
       fetchCategorias();
       toast.success('Categoría eliminada', { id: toastId });
     } catch (err) {
-      toast.error('No se pudo borrar (¿está en uso?)', { id: toastId });
+      toast.error('No se pudo borrar', { id: toastId });
     }
   };
 
@@ -261,7 +266,8 @@ function FisioBibliotecaPage() {
       <h2>Biblioteca de Ejercicios</h2>
       
       <div className="biblioteca-layout">
-        {/* Columna 1: Formulario */}
+        
+        {/* === COLUMNA 1: FORMULARIO (RESTAURADO COMPLETO) === */}
         <div className="tarjeta form-biblioteca">
           <h3>{idEditando ? 'Editar Ejercicio' : 'Añadir Nuevo Ejercicio'}</h3>
           
@@ -302,12 +308,12 @@ function FisioBibliotecaPage() {
 
             <div className="form-grupo">
               <label>URL Video (Opcional)</label>
-              <input type="text" value={videoUrl} onChange={e => setVideoUrl(e.target.value)} placeholder="https://www.youtube.com/..." />
+              <input type="text" value={videoUrl} onChange={e => setVideoUrl(e.target.value)} placeholder="https://..." />
             </div>
 
             <hr style={{margin: '1.5rem 0', borderTop: '1px solid #eee'}} />
             
-            
+            {/* === AQUÍ ESTÁ TU LÓGICA DE REGLAS ORIGINAL === */}
             <h4>Reglas de Corrección IA (Opcional)</h4>
             
             <div className="constructor-reglas-box">
@@ -351,7 +357,7 @@ function FisioBibliotecaPage() {
               </button>
             </div>
 
-            {/* Lista de reglas */}
+            {/* Lista de reglas añadidas */}
             {reglas.length > 0 && (
               <ul className="lista-reglas-agregadas">
                 {reglas.map((regla, index) => (
@@ -369,7 +375,6 @@ function FisioBibliotecaPage() {
             
             <hr style={{margin: '1.5rem 0', borderTop: '1px solid #eee'}} />
             
-            
             <button type="submit" className="boton-primario">
               {idEditando ? 'Actualizar Ejercicio' : 'Guardar Ejercicio'}
             </button>
@@ -382,56 +387,91 @@ function FisioBibliotecaPage() {
           </form>
         </div>
 
-        {/* --- Columna 2: Listas --- */}
+        {/* === COLUMNA 2: BUSCADOR Y LISTA (NUEVO DISEÑO) === */}
         <div className="lista-biblioteca">
-          <div className="tarjeta" style={{ marginBottom: '2rem' }}>
-            <h3>Gestionar Categorías</h3>
-            <form onSubmit={handleCategoriaSubmit} className="form-categoria">
-              <div className="form-grupo">
-                <label>Nueva Categoría</label>
-                <input 
-                  type="text" 
-                  value={nuevaCategoriaNombre}
-                  onChange={e => setNuevaCategoriaNombre(e.target.value)}
-                  placeholder="Ej: Estiramientos"
-                />
-              </div>
-              <button type="submit" className="boton-primario">Añadir Categoría</button>
+          
+          <div className="tarjeta" style={{ marginBottom: '1rem' }}>
+            <h3 style={{fontSize:'1rem'}}>Categorías</h3>
+            <form onSubmit={handleCategoriaSubmit} className="form-inline-categoria">
+              <input 
+                type="text" 
+                value={nuevaCategoriaNombre}
+                onChange={e => setNuevaCategoriaNombre(e.target.value)}
+                placeholder="Nueva categoría..."
+              />
+              <button type="submit" className="boton-primario">+</button>
             </form>
-            {categorias.length > 0 && <hr style={{ margin: '1.5rem 0' }} />}
-            <ul className="lista-categorias">
-              {categorias.map(cat => (
-                <li key={cat.id}>
-                  <span>{cat.nombre}</span>
-                  <button onClick={() => handleCategoriaDelete(cat.id)} className="boton-borrar-cat">X</button>
-                </li>
-              ))}
-            </ul>
+            <div style={{display:'flex', flexWrap:'wrap', gap:'5px', marginTop:'10px'}}>
+                 {categorias.map(cat => (
+                    <span key={cat.id} style={{background:'#eee', padding:'2px 8px', borderRadius:'12px', fontSize:'0.8rem', display:'flex', alignItems:'center', gap:'5px'}}>
+                        {cat.nombre}
+                        <button onClick={() => handleCategoriaDelete(cat.id)} style={{border:'none', background:'transparent', color:'red', cursor:'pointer', fontWeight:'bold'}}>×</button>
+                    </span>
+                 ))}
+            </div>
           </div>
           
           <div className="tarjeta">
-            <h3>Ejercicios Guardados</h3>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px'}}>
+                <h3 style={{margin:0}}>Catálogo ({ejerciciosFiltrados.length})</h3>
+                <small style={{color:'#666'}}>Total: {biblioteca.length}</small>
+            </div>
+
+            {/* Buscador y Filtros */}
+            <div className="barra-busqueda" style={{ display: 'flex', gap: '10px', marginBottom: '15px', background: '#f1f2f6', padding: '10px', borderRadius: '8px' }}>
+                <div style={{flex: 1}}>
+                    <input 
+                        type="text" 
+                        placeholder="🔍 Buscar por nombre..." 
+                        value={busqueda}
+                        onChange={(e) => setBusqueda(e.target.value)}
+                        style={{width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '6px'}}
+                    />
+                </div>
+                <div style={{flex: '0 0 150px'}}>
+                    <select 
+                        value={filtroCategoria} 
+                        onChange={(e) => setFiltroCategoria(e.target.value)}
+                        style={{width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '6px'}}
+                    >
+                        <option value="todas">Todas</option>
+                        {categorias.map(cat => (
+                            <option key={cat.id} value={cat.id}>{cat.nombre}</option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+
             {cargando ? (
               <div className="skeleton skeleton-box"></div>
             ) : (
-              biblioteca.map(ej => (
-                <div key={ej.id} className="ejercicio-bib-item">
-                  <div className="info">
-                    <span className="categoria-tag">
-                      {ej.categoria ? ej.categoria.nombre : 'Sin Cat.'}
-                    </span>
-                    <strong>{ej.nombre}</strong>
-                    {/* Indicador visual si tiene reglas IA */}
-                    {ej.reglasPostura && <span style={{fontSize:'0.8rem', color:'purple', marginLeft:'0.5rem'}}>✨</span>}
-                  </div>
-                  <div className="acciones-bib">
-                    <button onClick={() => handleEditClick(ej)} className="boton-editar">Editar</button>
-                    <button onClick={() => handleDelete(ej.id)} className="boton-borrar">Borrar</button>
-                  </div>
+                <div className="contenedor-catalogo" style={{ 
+                    height: '600px', 
+                    overflowY: 'auto',
+                    padding: '10px',
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '8px',
+                    backgroundColor: '#f9f9f9'
+                }}>
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', 
+                        gap: '15px' 
+                    }}>
+                        {ejerciciosFiltrados.map(ej => (
+                            <EjercicioCard key={ej.id} ejercicio={ej}>
+                                <div style={{display: 'flex', gap: '5px', marginTop: 'auto', paddingTop: '5px'}}>
+                                    <button onClick={() => handleEditClick(ej)} className="boton-editar" style={{flex:1, fontSize:'0.7rem', padding:'4px'}}>✏️</button>
+                                    <button onClick={() => handleDelete(ej.id)} className="boton-borrar" style={{flex:1, fontSize:'0.7rem', padding:'4px'}}>🗑️</button>
+                                </div>
+                            </EjercicioCard>
+                        ))}
+                        {ejerciciosFiltrados.length === 0 && (
+                            <p style={{gridColumn: '1 / -1', textAlign: 'center', color: '#999'}}>No hay resultados.</p>
+                        )}
+                    </div>
                 </div>
-              ))
             )}
-            {biblioteca.length === 0 && !cargando && <p>Aún no has guardado ejercicios.</p>}
           </div>
         </div>
       </div>

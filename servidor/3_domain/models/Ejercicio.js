@@ -35,6 +35,10 @@ Ejercicio.init({
   reglasPostura: {
     type: DataTypes.JSON,
     allowNull: true
+  },
+  categoriaId: {
+    type: DataTypes.INTEGER,
+    allowNull: true // o false, según prefieras
   }
 }, {
   sequelize,

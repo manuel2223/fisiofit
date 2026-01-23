@@ -200,15 +200,40 @@ function AsignarRutinaPage() {
             </div>
             
             {/* Lista Filtrada */}
+            {/* Lista Filtrada (MODIFICADA) */}
             <ul className="lista-biblioteca-picker">
               {bibliotecaFiltrada.map(ej => (
                 <li key={ej.id}>
-                  <span>{ej.nombre}</span>
-                  <button type="button" onClick={() => addEjercicioToRutina(ej)}>+</button>
+                  
+                  {/* 1. IMAGEN MINIATURA (NUEVO) */}
+                  <img 
+                    src={ej.videoUrl} 
+                    alt="ejercicio" 
+                    className="picker-img"
+                    loading="lazy"
+                    onError={(e) => e.target.src = 'https://via.placeholder.com/40'}
+                  />
+
+                  {/* 2. NOMBRE */}
+                  <span className="picker-info">{ej.nombre}</span>
+                  
+                  {/* 3. BOTÓN MÁS CHULO */}
+                  <button 
+                    type="button" 
+                    className="btn-add-picker"
+                    onClick={() => addEjercicioToRutina(ej)}
+                    title="Añadir a rutina"
+                  >
+                    +
+                  </button>
+
                 </li>
               ))}
+              
               {bibliotecaFiltrada.length === 0 && (
-                <li style={{textAlign: 'center', color: '#888', fontStyle: 'italic'}}>No hay ejercicios</li>
+                <li style={{textAlign: 'center', padding: '20px', color: '#888', display:'block', border:'none', background:'transparent'}}>
+                   🔍 No se encontraron ejercicios.
+                </li>
               )}
             </ul>
           </div>

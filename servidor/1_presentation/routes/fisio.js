@@ -79,13 +79,25 @@ router.get('/citas', [authMiddleware, fisioMiddleware], async (req, res) => {
 router.get('/biblioteca', [authMiddleware, fisioMiddleware], async (req, res) => {
   try {
     const ejercicios = await EjercicioBiblioteca.findAll({
-      where: { fisioterapeutaId: req.usuario.id },
-      include: [{ model: Categoria, as: 'categoria', attributes: ['nombre'] }],
+      where: {
+        // Lógica: Mis ejercicios O los públicos (null)
+        [Op.or]: [
+          { fisioterapeutaId: req.usuario.id }, 
+          { fisioterapeutaId: null }
+        ]
+      },
+      include: [
+        { 
+          model: Categoria, 
+          as: 'categoria', // <--- ¡AQUÍ ESTÁ LA CLAVE! Hay que ponerlo.
+          attributes: ['nombre'] 
+        }
+      ],
       order: [
-        [{ model: Categoria, as: 'categoria' }, 'nombre', 'ASC'],
-        ['nombre', 'ASC']
+        ['nombre', 'ASC'] 
       ]
     });
+    
     res.json(ejercicios);
   } catch (error) {
     console.error('Error en GET /fisio/biblioteca:', error);
@@ -123,22 +135,27 @@ router.put('/biblioteca/:id', [authMiddleware, fisioMiddleware], async (req, res
   const { nombre, descripcion, videoUrl, categoriaId, reglasPostura } = req.body;
   
   try {
-    const ejercicio = await EjercicioBiblioteca.findOne({
-      where: { id: req.params.id, fisioterapeutaId: req.usuario.id }
-    });
+    // CAMBIO: Usamos findByPk (Buscar por Primary Key) para buscar solo por ID
+    // Quitamos la restricción de "fisioterapeutaId" para poder editar los del seed.
+    const ejercicio = await EjercicioBiblioteca.findByPk(req.params.id);
+
     if (!ejercicio) return res.status(404).json({ msg: 'Ejercicio no encontrado.' });
     
+    // Actualizamos los campos
     ejercicio.nombre = nombre;
     ejercicio.descripcion = descripcion;
     ejercicio.videoUrl = videoUrl === '' ? null : videoUrl;
     ejercicio.categoriaId = categoriaId;
     ejercicio.reglasPostura = reglasPostura;
 
+    // Si quieres que al editar un ejercicio global pase a ser "tuyo", podrías descomentar esto:
+    // ejercicio.fisioterapeutaId = req.usuario.id; 
+
     await ejercicio.save();
     res.json(ejercicio);
+
   } catch (error) {
-    console.error('ERROR DETECTADO AL ACTUALIZAR EJERCICIO');
-    console.error(error);
+    console.error('ERROR DETECTADO AL ACTUALIZAR EJERCICIO:', error);
     if (error.name === 'SequelizeValidationError') {
       return res.status(400).json({ msg: 'Error de validación.' });
     }
@@ -149,16 +166,20 @@ router.put('/biblioteca/:id', [authMiddleware, fisioMiddleware], async (req, res
 // DELETE /api/fisio/biblioteca/:id 
 router.delete('/biblioteca/:id', [authMiddleware, fisioMiddleware], async (req, res) => {
   try {
-    const ejercicio = await EjercicioBiblioteca.findOne({
-      where: { id: req.params.id, fisioterapeutaId: req.usuario.id }
-    });
+    // CAMBIO: Lo mismo aquí, buscamos solo por ID
+    const ejercicio = await EjercicioBiblioteca.findByPk(req.params.id);
+
     if (!ejercicio) return res.status(404).json({ msg: 'Ejercicio no encontrado.' });
     
     await ejercicio.destroy();
     res.json({ msg: 'Ejercicio eliminado correctamente.' });
+
   } catch (error) {
-    console.error('ERROR DETECTADO AL BORRAR EJERCICIO');
-    console.error(error);
+    console.error('ERROR DETECTADO AL BORRAR EJERCICIO:', error);
+    // Controlar si el ejercicio está en uso en alguna rutina
+    if (error.name === 'SequelizeForeignKeyConstraintError') {
+        return res.status(400).json({ msg: 'No se puede borrar: Este ejercicio está siendo usado en una rutina.' });
+    }
     res.status(500).json({ msg: 'Error al eliminar el ejercicio.' });
   }
 });
